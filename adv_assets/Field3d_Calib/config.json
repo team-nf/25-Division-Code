@@ -1,0 +1,11 @@
+{
+    "name": "calib", 
+    "rotations": [{ "axis": "x", "degrees": 270 }],
+    "widthInches": 100, 
+    "heightInches": 100,
+    "defaultOrigin": "blue", 
+    "driverStations": [
+      [0, 0]  
+    ],
+    "gamePieces": []
+  }

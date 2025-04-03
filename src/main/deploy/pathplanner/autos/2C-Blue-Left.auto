@@ -1,0 +1,98 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "2C-BL-1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Closed"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2C-BL-2"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "CoralStage4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ThrowCoralAuto"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "CoralIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2C-BL-3"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "TakeCoralAuto"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2C-BL-4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2C-BL-5"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "CoralStage4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ThrowCoralAuto"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "CoralIntake"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
