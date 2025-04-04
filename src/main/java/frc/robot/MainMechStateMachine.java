@@ -62,6 +62,10 @@ public class MainMechStateMachine {
         
         if (lastState == "ThrowAlgaeNet" && state != "ThrowAlgaeNet") state = "AlgaeCarry";
 
+        if (!(lastState == "FullyClosed" || lastState == "CoralIntake") && state == "CoralIntake") state = "FullyClosed";
+
+        if (lastState == "CoralIntake" && !(state == "FullyClosed" || state == "CoralIntake")) state = "FullyClosed";
+
         if (m_gripperSubsystem.hasAlgae()) {
             if (!java.util.Arrays.asList("ThrowAlgaeNet", "ThrowAlgaeProcessor", "AlgaeGround", "Algae23", "Algae34", "AlgaeCarry").contains(state)) {
                 state = lastState;

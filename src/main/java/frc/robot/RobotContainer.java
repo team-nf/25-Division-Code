@@ -93,6 +93,8 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
+    NamedCommands.registerCommand("Closed",         new ClosedCmd(m_mainMech));
+    NamedCommands.registerCommand("FullyClosed",    new ClosedFullyCmd(m_mainMech));
     NamedCommands.registerCommand("CoralIntake",    new CoralIntakeCmd(m_mainMech));
     NamedCommands.registerCommand("CoralCarry",     new CoralCarryCmd(m_mainMech));
     NamedCommands.registerCommand("CoralStage1",    new L1Cmd(m_mainMech));
@@ -105,8 +107,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("AlgaeNet",       new AlgaeNetCmd(m_mainMech));
     NamedCommands.registerCommand("AlgaeProcessor", new AlgaeProCmd(m_mainMech));
     NamedCommands.registerCommand("AlgaeGround",    new AlgaeGroundCmd(m_mainMech));
-    NamedCommands.registerCommand("Closed",         new ClosedCmd(m_mainMech));
-    NamedCommands.registerCommand("FullyClosed",    new ClosedFullyCmd(m_mainMech));
+
 
 
     NamedCommands.registerCommand("TakeCoralAuto", m_gripperSubsystem.TakeCoralAutoCommand());
@@ -136,8 +137,8 @@ public class RobotContainer {
         if (ally.get() == Alliance.Red) {
           m_isColorBlue.setDefaultOption("Red", false);
           m_isColorBlue.addOption("Blue", true);
-
         }
+
         if (ally.get() == Alliance.Blue) {
           m_isColorBlue.setDefaultOption("Blue", true);
           m_isColorBlue.addOption("red", false);
@@ -192,7 +193,7 @@ public class RobotContainer {
     m_operatorController.options().whileTrue(NamedCommands.getCommand("Algae34"));
 
     m_driverController.rightBumper().whileTrue(m_swerve.applyRequest(() ->
-    driveRobotCentric.withVelocityX(m_driverController.getLeftY() * m_swerve.getMaxSpeed() * m_swerve.getDriveMultiplier()* kDrive * 0.3) // Drive forward with negative Y (forward)
+    driveRobotCentric.withVelocityX(-m_driverController.getLeftY() * m_swerve.getMaxSpeed() * m_swerve.getDriveMultiplier()* kDrive * 0.3) // Drive forward with negative Y (forward)
         .withVelocityY(-m_driverController.getLeftX() * m_swerve.getMaxSpeed() * m_swerve.getDriveMultiplier() * kDrive * 0.3) // Drive left with negative X (left)
         .withRotationalRate(-m_driverController.getRightX() * m_swerve.getMaxAngularRate() * kAngle) // Drive counterclockwise with negative X (left)
     ));
@@ -533,43 +534,43 @@ public class RobotContainer {
 
   public Command autoReefPoseS4L(int id)
   {
-    return m_swerve.goToTag(id).andThen(NamedCommands.getCommand("CoralStage4").withDeadline(m_swerve.goToReefWithPID(id, true, 4)));
+    return m_swerve.goToTagL(id).andThen(NamedCommands.getCommand("CoralStage4").withDeadline(m_swerve.goToReefWithPID(id, true, 4)));
   }
 
   public Command autoReefPoseS4R(int id)
   {
-    return m_swerve.goToTag(id).andThen(NamedCommands.getCommand("CoralStage4").withDeadline(m_swerve.goToReefWithPID(id, false, 4)));
+    return m_swerve.goToTagR(id).andThen(NamedCommands.getCommand("CoralStage4").withDeadline(m_swerve.goToReefWithPID(id, false, 4)));
   }
 
   public Command autoReefPoseS3L(int id)
   {
-    return m_swerve.goToTag(id).andThen(NamedCommands.getCommand("CoralStage3").withDeadline(m_swerve.goToReefWithPID(id, true, 3)));
+    return m_swerve.goToTagL(id).andThen(NamedCommands.getCommand("CoralStage3").withDeadline(m_swerve.goToReefWithPID(id, true, 3)));
   }
 
   public Command autoReefPoseS3R(int id)
   {
-    return m_swerve.goToTag(id).andThen(NamedCommands.getCommand("CoralStage3").withDeadline(m_swerve.goToReefWithPID(id, false, 3)));
+    return m_swerve.goToTagR(id).andThen(NamedCommands.getCommand("CoralStage3").withDeadline(m_swerve.goToReefWithPID(id, false, 3)));
   }
 
   
   public Command autoReefPoseS2L(int id)
   {
-    return m_swerve.goToTag(id).andThen(NamedCommands.getCommand("CoralStage2").withDeadline(m_swerve.goToReefWithPID(id, true, 3)));
+    return m_swerve.goToTagL(id).andThen(NamedCommands.getCommand("CoralStage2").withDeadline(m_swerve.goToReefWithPID(id, true, 3)));
   }
 
   public Command autoReefPoseS2R(int id)
   {
-    return m_swerve.goToTag(id).andThen(NamedCommands.getCommand("CoralStage2").withDeadline(m_swerve.goToReefWithPID(id, false, 3)));
+    return m_swerve.goToTagR(id).andThen(NamedCommands.getCommand("CoralStage2").withDeadline(m_swerve.goToReefWithPID(id, false, 3)));
   }
 
   public Command autoReefPoseS1L(int id)
   {
-    return m_swerve.goToTag(id).andThen(NamedCommands.getCommand("CoralStage1").withDeadline(m_swerve.goToReefWithPID(id, true, 3)));
+    return m_swerve.goToTagL(id).andThen(NamedCommands.getCommand("CoralStage1").withDeadline(m_swerve.goToReefWithPID(id, true, 3)));
   }
 
   public Command autoReefPoseS1R(int id)
   {
-    return m_swerve.goToTag(id).andThen(NamedCommands.getCommand("CoralStage1").withDeadline(m_swerve.goToReefWithPID(id, false, 3)));
+    return m_swerve.goToTagR(id).andThen(NamedCommands.getCommand("CoralStage1").withDeadline(m_swerve.goToReefWithPID(id, false, 3)));
   }
 
   public Command autoReefA23(int id)

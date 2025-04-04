@@ -236,8 +236,8 @@ public class ArmSubsystem extends SubsystemBase {
 
     if(!isMotorsSet)
     {
-    if(Math.abs(SmartDashboard.getNumber("Arm/J1/M-StartPos", 0) - m_firstJointHalfcoder.getAngle()) > 2
-        ||  Math.abs(SmartDashboard.getNumber("Arm/J2/M-StartPos", 0) - m_secondJointHalfcoder.getAngle()) > 2)
+    if(Math.abs(SmartDashboard.getNumber("Arm/J1/M-StartPos", 0) - m_firstJointHalfcoder.getAngle()) > 5
+        ||  Math.abs(SmartDashboard.getNumber("Arm/J2/M-StartPos", 0) - m_secondJointHalfcoder.getAngle()) > 5)
     {
       resetArmPositions();
     }
@@ -477,7 +477,7 @@ public class ArmSubsystem extends SubsystemBase {
 
   public boolean checkMotorsSet()
   {
-    if(!isMotorsSet) isMotorsSet = (Math.abs(m_firstJointHalfcoder.getAngle() - armJ1MotorPos)) < 2 && (Math.abs(m_secondJointHalfcoder.getAngle() - armJ2MotorPos)) < 2;
+    if(!isMotorsSet) isMotorsSet = (Math.abs(m_firstJointHalfcoder.getAngle() - armJ1MotorPos)) < 5 && (Math.abs(m_secondJointHalfcoder.getAngle() - armJ2MotorPos)) < 5;
     return isMotorsSet;
   }
 

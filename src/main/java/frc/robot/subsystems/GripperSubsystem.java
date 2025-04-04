@@ -31,7 +31,7 @@ public class GripperSubsystem extends SubsystemBase {
   private int timerC_throw = 0;
 
   private final int algaeDelay = 40;
-  private final int coralDelay = 8; 
+  private final int coralDelay = 1; 
 
   private final DigitalInput m_AlgaeSensor = new DigitalInput(GripperConstants.kAlgaeSensor);
   private final DigitalInput m_coralSensor = new DigitalInput(GripperConstants.kCoralSensor);
@@ -61,7 +61,7 @@ public class GripperSubsystem extends SubsystemBase {
   public Command takeAlgae() {return run(() -> the_hupletici.set(.5)).until(this::hasAlgae).finallyDo(() -> {if(hasAlgae()) the_hupletici.set(0.2); else stop();});}
 
   //public Command takeCoral() {return runEnd(() -> sparkPID.setReference(-0.3, ControlType.kMAXMotionVelocityControl), this::stop).until(this::hasCoral);}
-  public Command takeCoral() {return run(() -> the_hupletici.set(-0.4)).until(this::hasCoral).finallyDo(this::stop);}
+  public Command takeCoral() {return run(() -> the_hupletici.set(-0.43)).until(this::hasCoral).finallyDo(this::stop);}
 
   //public Command throwAlgae() {return runEnd(() -> sparkPID.setReference(-0.6, ControlType.kMAXMotionVelocityControl), this::stop);}
   public Command throwAlgae() {return run(() -> the_hupletici.set(-0.5)).finallyDo(this::stop);}

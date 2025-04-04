@@ -87,8 +87,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Elevator/ElevatorHeight", elevatorHeight);
     SmartDashboard.putBoolean("Elevator/EleGoalReached", isGoalReached);
     SmartDashboard.putBoolean("Arm/isArmReady", elevatorHeight > Elevator.kReadyPos);
-    if (RobotState.isDisabled()) m_motor.setControl(m_brake);
     if (RobotState.isTest()) m_motor.setControl(m_neutral);
+    else if (RobotState.isDisabled()) m_motor.setControl(m_brake);
 
     if(!isMotorsSet)
     {

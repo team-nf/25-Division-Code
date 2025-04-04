@@ -94,8 +94,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final double initialDriveMultiplier = 0.7;
     private double driveMultiplier = initialDriveMultiplier;
 
-    private final Pose2d blueNetPose2d = new Pose2d(7.6, 6.5, new Rotation2d(Units.degreesToRadians(0)));
-    private final Pose2d redNetPose2d = new Pose2d(10, 2, new Rotation2d(180));
+    private final Pose2d blueNetPose2d = new Pose2d(7.85, 6.5, new Rotation2d(Units.degreesToRadians(0)));
+    private final Pose2d redNetPose2d = new Pose2d(9.9, 2, new Rotation2d(Units.degreesToRadians(180)));
 
     private final SwerveRequest.RobotCentric roboDrive = new SwerveRequest.RobotCentric()
     .withDeadband(MaxSpeed * 0.035)
@@ -106,14 +106,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     .withDriveRequestType(DriveRequestType.Velocity);
 
     PIDController autoControllerX = new PIDController(
-        1.0, 0.2, 0.2);
+        1.5, 0.4, 0.2);
     
     PIDController autoControllerY = new PIDController(
-        1.0, 0.2, 0.2);
+        2, 0.4, 0.2);
 
     private final PhoenixPIDController headingController = new PhoenixPIDController(2.5, 0., 0.);
 
-    private final double errorLimit = 0.02;
+    private final double errorLimit = 0.01;
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -322,6 +322,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         else if(0 <= SmartDashboard.getNumber("Elevator/ElevatorHeight", -10) && 0.6 >= SmartDashboard.getNumber("Elevator/ElevatorHeight", -10)) 
                 driveMultiplier = initialDriveMultiplier;
         else driveMultiplier = initialDriveMultiplier/2;
+
+        SmartDashboard.putNumber("SwerveSpeed", 
+            Math.sqrt(Math.pow(getState().Speeds.vxMetersPerSecond,2) + 
+                      Math.pow(getState().Speeds.vyMetersPerSecond,2)));
     }
 
     private void startSimThread() {
@@ -414,7 +418,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public PathConstraints getConstraints() {
         return new PathConstraints(
-            MetersPerSecond.of(4.5).in(MetersPerSecond), MetersPerSecondPerSecond.of(3.5).in(MetersPerSecondPerSecond),
+            MetersPerSecond.of(4.5).in(MetersPerSecond), MetersPerSecondPerSecond.of(4.5).in(MetersPerSecondPerSecond),
             RotationsPerSecond.of(180).in(RadiansPerSecond), RotationsPerSecondPerSecond.of(120).in(RadiansPerSecondPerSecond));
     }
 
@@ -528,143 +532,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return AutoBuilder.pathfindToPose(reefTargetPose2d, getConstraintsForAuto());
     }
 
-    public Command goToReefWithMarker(int id, boolean isLeft, int stage)
-    {
-        Pose3d aprilTagPose = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape).getTagPose(id).orElse(new Pose3d(3,3,0, new Rotation3d(0,0,0)));
-        Pose2d aprilTagPose2d = new Pose2d(aprilTagPose.getX(), aprilTagPose.getY(), new Rotation2d(aprilTagPose.getRotation().getZ()));
-        Pose2d aprilTagTargetPose = new Pose2d();
-        Pose2d reefTargetPose2d = new Pose2d();
-
-        aprilTagTargetPose = aprilTagPose2d.transformBy(AutoConstants.RobotPosByTag);
-
-        if(stage == 4)
-        {
-            if(isLeft)
-            {
-               reefTargetPose2d = aprilTagPose2d.transformBy(AutoConstants.ReefPosS4LByTag);
-            }
-            else
-            {
-               reefTargetPose2d = aprilTagPose2d.transformBy(AutoConstants.ReefPosS4RByTag);
-            }
-        }
-        else if(stage == 3)
-        {
-            if(isLeft)
-            {
-                reefTargetPose2d = aprilTagPose2d.transformBy(AutoConstants.ReefPosS3LByTag);
-            }
-            else
-            {
-                reefTargetPose2d = aprilTagPose2d.transformBy(AutoConstants.ReefPosS3RByTag);
-            }
-        }
-
-        return AutoBuilder.pathfindToPose(aprilTagTargetPose, getConstraints()).andThen(AutoBuilder.pathfindToPose(reefTargetPose2d, getConstraints()));
-    }
-
-    public Command goToReefWithPath(int id, boolean isLeft, int stage)
-    {
-        Pose3d aprilTagPose = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape).getTagPose(id).orElse(new Pose3d(3,3,0, new Rotation3d(0,0,0)));
-        Pose2d aprilTagPose2d = new Pose2d(aprilTagPose.getX(), aprilTagPose.getY(), new Rotation2d(aprilTagPose.getRotation().getZ()));
-        Pose2d aprilTagTargetPose = new Pose2d();
-        Pose2d reefTargetPose2d = new Pose2d();
-
-        aprilTagTargetPose = aprilTagPose2d.transformBy(AutoConstants.RobotPosByTag);
-
-        if(stage == 4)
-        {
-            if(isLeft)
-            {
-               reefTargetPose2d = aprilTagPose2d.transformBy(AutoConstants.ReefPosS4LByTag);
-            }
-            else
-            {
-               reefTargetPose2d = aprilTagPose2d.transformBy(AutoConstants.ReefPosS4RByTag);
-            }
-        }
-        else if(stage == 3)
-        {
-            if(isLeft)
-            {
-                reefTargetPose2d = aprilTagPose2d.transformBy(AutoConstants.ReefPosS3LByTag);
-            }
-            else
-            {
-                reefTargetPose2d = aprilTagPose2d.transformBy(AutoConstants.ReefPosS3RByTag);
-            }
-        }
-
-        aprilTagTargetPose = new Pose2d(new Translation2d(14,1.5), new Rotation2d(Units.degreesToRadians(120)));
-        reefTargetPose2d =   new Pose2d(new Translation2d(13,2.5), new Rotation2d(Units.degreesToRadians(120)));
-
-        
-        SmartDashboard.putString("ATarget", aprilTagPose2d.toString());
-        SmartDashboard.putString("RTarget", reefTargetPose2d.toString());
-        
-        PathPlannerPath path;
-        try {
-            path = PathPlannerPath.fromPathFile("Test2");
-        } catch (Exception e) {
-            return null; // Handle the error appropriately
-        }
-
-        return AutoBuilder.pathfindThenFollowPath( 
-            path
-            , getConstraints());
-    }
-
-    public Command goToReefWithPid(int id, boolean isLeft, int stage)
-    {
-        Pose3d aprilTagPose = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape).getTagPose(id).orElse(new Pose3d(3,3,0, new Rotation3d(0,0,0)));
-        Pose2d aprilTagPose2d = new Pose2d(aprilTagPose.getX(), aprilTagPose.getY(), new Rotation2d(aprilTagPose.getRotation().getZ()));
-        Pose2d aprilTagTargetPose = new Pose2d();
-        Pose2d reefTargetPose2d = new Pose2d();
-
-        aprilTagTargetPose = aprilTagPose2d.transformBy(AutoConstants.RobotPosByTag);
-
-        if(stage == 4)
-        {
-            if(isLeft)
-            {
-               reefTargetPose2d = aprilTagPose2d.transformBy(AutoConstants.ReefPosS4LByTag);
-            }
-            else
-            {
-               reefTargetPose2d = aprilTagPose2d.transformBy(AutoConstants.ReefPosS4RByTag);
-            }
-        }
-        else if(stage == 3)
-        {
-            if(isLeft)
-            {
-                reefTargetPose2d = aprilTagPose2d.transformBy(AutoConstants.ReefPosS3LByTag);
-            }
-            else
-            {
-                reefTargetPose2d = aprilTagPose2d.transformBy(AutoConstants.ReefPosS3RByTag);
-            }
-        }
-
-        aprilTagTargetPose = new Pose2d(new Translation2d(14,1.5), new Rotation2d(Units.degreesToRadians(120)));
-        reefTargetPose2d =   new Pose2d(new Translation2d(13,2.5), new Rotation2d(Units.degreesToRadians(120)));
-
-        
-        SmartDashboard.putString("ATarget", aprilTagPose2d.toString());
-        SmartDashboard.putString("RTarget", reefTargetPose2d.toString());
-        
-        PathPlannerPath path;
-        try {
-            path = PathPlannerPath.fromPathFile("Test2");
-        } catch (Exception e) {
-            return null; // Handle the error appropriately
-        }
-
-        return AutoBuilder.pathfindThenFollowPath( 
-            path
-            , getConstraints());
-    }
-
     public Command goToAlgae(int id, int stage)
     {
         Pose3d aprilTagPose = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape).getTagPose(id).orElse(new Pose3d(3,3,0, new Rotation3d(0,0,0)));
@@ -705,33 +572,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return AutoBuilder.pathfindToPose(intakeTargetPose2d, getConstraintsForAuto());
     }
 
-    public Command goToProcessor(int id)
-    {
-        Pose3d aprilTagPose = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape).getTagPose(id).orElse(new Pose3d(3,3,0, new Rotation3d(0,0,0)));
-        Pose2d aprilTagPose2d = new Pose2d(aprilTagPose.getX(), aprilTagPose.getY(), new Rotation2d(aprilTagPose.getRotation().getZ()));
-        Pose2d aprilTagTargetPose = new Pose2d();
-        Pose2d algaeTargetPose2d = new Pose2d();
-
-        aprilTagTargetPose = aprilTagPose2d.transformBy(AutoConstants.RobotPosByTag);
-
-        return AutoBuilder.pathfindToPose(aprilTagTargetPose, getConstraints())
-                            .andThen(AutoBuilder.pathfindToPose(algaeTargetPose2d, getConstraints()));
-    }
-
-    public Command goToNet(int id)
-    {
-        Pose3d aprilTagPose = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape).getTagPose(id).orElse(new Pose3d(3,3,0, new Rotation3d(0,0,0)));
-        Pose2d aprilTagPose2d = new Pose2d(aprilTagPose.getX(), aprilTagPose.getY(), new Rotation2d(aprilTagPose.getRotation().getZ()));
-        Pose2d aprilTagTargetPose = new Pose2d();
-        Pose2d algaeTargetPose2d = new Pose2d();
-
-        aprilTagTargetPose = aprilTagPose2d.transformBy(AutoConstants.RobotPosByTag);
-
-        return AutoBuilder.pathfindToPose(aprilTagTargetPose, getConstraints())
-                            .andThen(AutoBuilder.pathfindToPose(algaeTargetPose2d, getConstraints()));
-    }
-
-
     public Command goToTag(int id)
     {
         Pose3d aprilTagPose = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape).getTagPose(id).orElse(new Pose3d(3,3,0, new Rotation3d(0,0,0)));
@@ -753,10 +593,32 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         return AutoBuilder.pathfindToPose(aprilTagTargetPose, getConstraintsForAuto());
     }
+
+    public Command goToTagL(int id)
+    {
+        Pose3d aprilTagPose = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape).getTagPose(id).orElse(new Pose3d(3,3,0, new Rotation3d(0,0,0)));
+        Pose2d aprilTagPose2d = new Pose2d(aprilTagPose.getX(), aprilTagPose.getY(), new Rotation2d(aprilTagPose.getRotation().getZ()));
+        Pose2d aprilTagTargetPose = new Pose2d();
+
+        aprilTagTargetPose = aprilTagPose2d.transformBy(AutoConstants.RobotPosByTagL);
+
+        return AutoBuilder.pathfindToPose(aprilTagTargetPose, getConstraints());
+    }
+
+    public Command goToTagR(int id)
+    {
+        Pose3d aprilTagPose = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape).getTagPose(id).orElse(new Pose3d(3,3,0, new Rotation3d(0,0,0)));
+        Pose2d aprilTagPose2d = new Pose2d(aprilTagPose.getX(), aprilTagPose.getY(), new Rotation2d(aprilTagPose.getRotation().getZ()));
+        Pose2d aprilTagTargetPose = new Pose2d();
+
+        aprilTagTargetPose = aprilTagPose2d.transformBy(AutoConstants.RobotPosByTagR);
+
+        return AutoBuilder.pathfindToPose(aprilTagTargetPose, getConstraints());
+    }
     
-    public void updateOdometryWithLL_mt1() {
+    public void updateOdometryWithLL_mt1(String limelightName) {
         boolean doRejectUpdate = false;
-        LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-c");
+        LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName);
         
         if(mt1.tagCount == 1 && mt1.rawFiducials.length == 1)
         {
@@ -793,7 +655,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   
         LimelightHelpers.SetRobotOrientation(limelightName, headingDeg, 0, 0, 0, 0, 0);
         var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelightName);
-        if (llMeasurement != null && llMeasurement.tagCount > 0 && Math.abs(omegaRps) < 2.0) {
+        if (llMeasurement != null && llMeasurement.tagCount > 0 && Math.abs(omegaRps) < 2.0 
+                && llMeasurement.avgTagDist < 2.5) {
           addVisionMeasurement(llMeasurement.pose, llMeasurement.timestampSeconds);
         }
     }
@@ -805,7 +668,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public Command resetHeading()
     {
-      return runOnce(() -> seedFieldCentric());     
+      //return runOnce(() -> resetRotation(new Rotation2d(DriverStation.getAlliance().get() == Alliance.Blue ? 0 : Math.PI)));   
+      return runOnce(() -> seedFieldCentric());
     }
 
     public void registerTelemetry() {
@@ -853,6 +717,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return run(() -> {
             if(autoControllerX.getSetpoint() != pose.getX()) autoControllerX.setSetpoint(pose.getX());
             if(autoControllerY.getSetpoint() != pose.getY()) autoControllerY.setSetpoint(pose.getY());
+
+            SmartDashboard.putNumber("PID-XError", autoControllerX.getPositionError());
+            SmartDashboard.putNumber("PID-YError", autoControllerY.getPositionError());
 
             this.setControl(driveToPoint.withVelocityX(-autoControllerX.calculate(getState().Pose.getX()))
                                         .withVelocityY(-autoControllerY.calculate(getState().Pose.getY()))
