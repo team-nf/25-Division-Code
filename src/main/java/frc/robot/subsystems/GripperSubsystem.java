@@ -30,7 +30,7 @@ public class GripperSubsystem extends SubsystemBase {
   private int timerA_throw = 0;
   private int timerC_throw = 0;
 
-  private final int algaeDelay = 40;
+  private final int algaeDelay = 30;
   private final int coralDelay = 1; 
 
   private final DigitalInput m_AlgaeSensor = new DigitalInput(GripperConstants.kAlgaeSensor);

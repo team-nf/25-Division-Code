@@ -418,7 +418,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public PathConstraints getConstraints() {
         return new PathConstraints(
-            MetersPerSecond.of(4.5).in(MetersPerSecond), MetersPerSecondPerSecond.of(4.5).in(MetersPerSecondPerSecond),
+            MetersPerSecond.of(4.2).in(MetersPerSecond), MetersPerSecondPerSecond.of(4.2).in(MetersPerSecondPerSecond),
             RotationsPerSecond.of(180).in(RadiansPerSecond), RotationsPerSecondPerSecond.of(120).in(RadiansPerSecondPerSecond));
     }
 
@@ -550,6 +550,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return AutoBuilder.pathfindToPose(algaeTargetPose2d, getConstraints());
     }
 
+    public Command goToAlgaeWithPID(int id)
+    {
+        Pose3d aprilTagPose = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape).getTagPose(id).orElse(new Pose3d(3,3,0, new Rotation3d(0,0,0)));
+        Pose2d aprilTagPose2d = new Pose2d(aprilTagPose.getX(), aprilTagPose.getY(), new Rotation2d(aprilTagPose.getRotation().getZ()));
+        Pose2d algaeTargetPose2d = new Pose2d();
+
+        algaeTargetPose2d = aprilTagPose2d.transformBy(AutoConstants.TakeAlgaeByTag);
+
+
+        return goToPointPID(algaeTargetPose2d);
+    }
+
     public Command goToIntake(int id)
     {
         Pose3d aprilTagPose = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape).getTagPose(id).orElse(new Pose3d(3,3,0, new Rotation3d(0,0,0)));
@@ -655,8 +667,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
   
         LimelightHelpers.SetRobotOrientation(limelightName, headingDeg, 0, 0, 0, 0, 0);
         var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelightName);
-        if (llMeasurement != null && llMeasurement.tagCount > 0 && Math.abs(omegaRps) < 2.0 
-                && llMeasurement.avgTagDist < 2.5) {
+        if (llMeasurement != null && llMeasurement.tagCount > 0 && Math.abs(omegaRps) < 2.5 
+                && llMeasurement.avgTagDist < 3) {
           addVisionMeasurement(llMeasurement.pose, llMeasurement.timestampSeconds);
         }
     }

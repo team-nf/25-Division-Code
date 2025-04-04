@@ -387,6 +387,8 @@ public class RobotContainer {
     m_driverController.rightTrigger().and(() -> {return isAlgaeSelected;}).whileTrue(NamedCommands.getCommand("AlgaeNet"));
     m_driverController.leftTrigger().and(() -> {return isAlgaeSelected;}).whileTrue(NamedCommands.getCommand("AlgaeProcessor"));
 
+    m_driverController.y().and(() -> {return isAlgaeSelected;}).onTrue(m_gripperSubsystem.takeAlgae());
+
     m_driverController.y().and(() -> {return isAlgaeSelected;}).and(() -> {return checkReef(1, true);})
         .whileTrue(autoReefA23(17));
     m_driverController.y().and(() -> {return isAlgaeSelected;}).and(() -> {return checkReef(2, true);})
@@ -575,12 +577,12 @@ public class RobotContainer {
 
   public Command autoReefA23(int id)
   {
-    return m_swerve.goToAlgae(id,2).andThen(NamedCommands.getCommand("Algae23"));
+    return NamedCommands.getCommand("Algae23").withDeadline(m_swerve.goToAlgae(id,2)).andThen(m_swerve.goToAlgaeWithPID(id));
   }
 
   public Command autoReefA34(int id)
   {
-    return m_swerve.goToAlgae(id,3).andThen(NamedCommands.getCommand("Algae34"));
+    return m_swerve.goToAlgae(id,3).andThen(NamedCommands.getCommand("Algae34")).andThen(m_swerve.goToAlgaeWithPID(id));
   }
 
 

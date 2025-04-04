@@ -235,13 +235,15 @@ public final class Constants {
   {
     public static final double[] stage4Pos18R   = {3.15,3.95,0};
     public static final double[] stage3Pos18R   = {3.15,3.95,0};
-    public static final double[] stage4Pos18L   = {3.15,4.32,0};
-    public static final double[] stage3Pos18L   = {3.15,4.32,0};
-    public static final double[] algae3Pos      = {2.84,3.8,0};
-    public static final double[] algae2Pos      = {2.84,3.8,0};
+    public static final double[] stage4Pos18L   = {3.15,4.3,0};
+    public static final double[] stage3Pos18L   = {3.15,4.3,0};
+    public static final double[] algae3Pos      = {2.9,4.1,0};
+    public static final double[] algae2Pos      = {2.9,4.15,0};
+    public static final double[] takeAlgaePos   = {3.15,4.15,0};
     public static final double[] checkTagPos18R = {2.85,3.95,0};
-    public static final double[] checkTagPos18L = {2.85,4.32,0};
+    public static final double[] checkTagPos18L = {2.85,4.25,0};
     public static final double[] checkTagPos18  = {2.6,4.1,0};
+
 
 
     public static final double[] algaeNetPos14       = {1.5,6,0};
@@ -255,6 +257,7 @@ public final class Constants {
     public static final Pose2d stage3LPose2D  = new Pose2d(stage3Pos18L[0], stage3Pos18L[1], Rotation2d.fromDegrees(stage3Pos18L[2]));
     public static final Pose2d algae3Pose2D   = new Pose2d(algae3Pos[0], algae3Pos[1], Rotation2d.fromDegrees(algae3Pos[2]));
     public static final Pose2d algae2Pose2D   = new Pose2d(algae2Pos[0], algae2Pos[1], Rotation2d.fromDegrees(algae2Pos[2]));
+    public static final Pose2d takeAlgaePose2d   = new Pose2d(takeAlgaePos[0], takeAlgaePos[1], Rotation2d.fromDegrees(takeAlgaePos[2]));
     public static final Pose2d checkTagRPose2D = new Pose2d(checkTagPos18R[0], checkTagPos18R[1], Rotation2d.fromDegrees(checkTagPos18R[2]));
     public static final Pose2d checkTagLPose2D = new Pose2d(checkTagPos18L[0], checkTagPos18L[1], Rotation2d.fromDegrees(checkTagPos18L[2]));
     public static final Pose2d checkTagPose2D  = new Pose2d(checkTagPos18[0], checkTagPos18[1], Rotation2d.fromDegrees(checkTagPos18[2]));
@@ -300,6 +303,8 @@ public final class Constants {
     public static final Transform2d ReefPosS3LByTag =  new Transform2d(TAG18_POSE2D, stage3LPose2D);
     public static final Transform2d Algae3ByTag =  new Transform2d(TAG18_POSE2D, algae3Pose2D);
     public static final Transform2d Algae2ByTag =  new Transform2d(TAG18_POSE2D, algae2Pose2D);
+    public static final Transform2d TakeAlgaeByTag =  new Transform2d(TAG18_POSE2D, takeAlgaePose2d);
+
 
     public static final Transform2d AlgaeNetByTag =  new Transform2d(TAG14_POSE2D, algaeNet14Pose2D);
     public static final Transform2d AlgaeProcessorByTag =  new Transform2d(TAG16_POSE2D, algaeProcessor16Pose2D);
