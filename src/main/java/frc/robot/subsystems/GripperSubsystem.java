@@ -20,7 +20,7 @@ import static edu.wpi.first.units.Units.*;
 
 public class GripperSubsystem extends SubsystemBase {
 
-  //private final TalonFX the_hupletici = new TalonFX(GripperConstants.kGripperID);
+  private final TalonFX the_hupletici = new TalonFX(GripperConstants.kGripperID);
 
   private boolean hasAlgae = false;
   private boolean hasCoral = false;
@@ -30,7 +30,8 @@ public class GripperSubsystem extends SubsystemBase {
   private int timerA_throw = 0;
   private int timerC_throw = 0;
 
-  private final int delay = 4;
+  private final int algaeDelay = 40;
+  private final int coralDelay = 8; 
 
   private final DigitalInput m_AlgaeSensor = new DigitalInput(GripperConstants.kAlgaeSensor);
   private final DigitalInput m_coralSensor = new DigitalInput(GripperConstants.kCoralSensor);
@@ -55,18 +56,18 @@ public class GripperSubsystem extends SubsystemBase {
 
   /** Used for testing */
   //public Command controlWithTriggers(double input) {return run(() -> );}
-  /*
+  
   //public Command takeAlgae() {return runEnd(() -> sparkPID.setReference(.6, ControlType.kMAXMotionVelocityControl), this::stop).until(this::hasAlgae);}
-  public Command takeAlgae() {return run(() -> the_hupletici.set(-.2)).until(this::hasAlgae).finallyDo(() -> the_hupletici.set(-0.1));}
+  public Command takeAlgae() {return run(() -> the_hupletici.set(.5)).until(this::hasAlgae).finallyDo(() -> {if(hasAlgae()) the_hupletici.set(0.2); else stop();});}
 
   //public Command takeCoral() {return runEnd(() -> sparkPID.setReference(-0.3, ControlType.kMAXMotionVelocityControl), this::stop).until(this::hasCoral);}
-  public Command takeCoral() {return run(() -> the_hupletici.set(0.3)).until(this::hasCoral).finallyDo(this::stop);}
+  public Command takeCoral() {return run(() -> the_hupletici.set(-0.4)).until(this::hasCoral).finallyDo(this::stop);}
 
   //public Command throwAlgae() {return runEnd(() -> sparkPID.setReference(-0.6, ControlType.kMAXMotionVelocityControl), this::stop);}
-  public Command throwAlgae() {return run(() -> the_hupletici.set(0.5)).finallyDo(this::stop);}
+  public Command throwAlgae() {return run(() -> the_hupletici.set(-0.5)).finallyDo(this::stop);}
 
   //public Command throwCoral() {return runEnd(() -> sparkPID.setReference(0.5, ControlType.kMAXMotionVelocityControl), this::stop);}
-  public Command throwCoral() {return runEnd(() -> the_hupletici.set(-.4), this::stop).onlyWhile(this::hasCoral);}
+  public Command throwCoral() {return runEnd(() -> the_hupletici.set(-0.6), this::stop).onlyWhile(this::hasCoral);}
   //public Command stop() {return run(() -> sparkPID.setReference(0.03 ControlType.kMAXMotionVelocityControl));}
   public void stop() {the_hupletici.stopMotor();}
 
@@ -76,14 +77,14 @@ public class GripperSubsystem extends SubsystemBase {
 
   public Command TakeCoralAutoCommand()
   {
-    return run(() -> the_hupletici.set(0.3)).until(this::hasCoral).finallyDo(this::stop);
+    return run(() -> the_hupletici.set(-0.4)).until(this::hasCoral).finallyDo(this::stop);
   }
 
   public Command ThrowCoralAutoCommand()
   {
-    return run(() -> the_hupletici.set(-0.4)).until(this::hasNotCoral).finallyDo(this::stop);
+    return run(() -> the_hupletici.set(-0.6)).until(this::hasNotCoral).finallyDo(this::stop);
   }
-  */
+  
   @Override
   public void periodic() {
 
@@ -93,7 +94,7 @@ public class GripperSubsystem extends SubsystemBase {
     
     if(!m_AlgaeSensor.get() && !hasAlgae) {
       timerA_take++;
-      if (!m_AlgaeSensor.get() && timerA_take == delay) // periodic 20msde bir çağrılıyor, 1 saniye beklemek için 50 çağrı yapılmalı
+      if (!m_AlgaeSensor.get() && timerA_take == algaeDelay) // periodic 20msde bir çağrılıyor, 1 saniye beklemek için 50 çağrı yapılmalı
       {
         this.hasAlgae = true;
         timerA_take = 0;
@@ -104,7 +105,7 @@ public class GripperSubsystem extends SubsystemBase {
 
     if(m_AlgaeSensor.get() && hasAlgae) {
       timerA_throw++;
-      if (m_AlgaeSensor.get() && timerA_throw == delay) // periodic 20msde bir çağrılıyor, 1 saniye beklemek için 50 çağrı yapılmalı
+      if (m_AlgaeSensor.get() && timerA_throw == algaeDelay) // periodic 20msde bir çağrılıyor, 1 saniye beklemek için 50 çağrı yapılmalı
       {
         this.hasAlgae = false;
         timerA_throw = 0;
@@ -115,7 +116,7 @@ public class GripperSubsystem extends SubsystemBase {
 
     if(!m_coralSensor.get() && !hasCoral) {
       timerC_take++;
-      if (!m_coralSensor.get() && timerC_take == delay) 
+      if (!m_coralSensor.get() && timerC_take == coralDelay) 
       {
         this.hasCoral = true;
         timerC_take = 0;
@@ -126,7 +127,7 @@ public class GripperSubsystem extends SubsystemBase {
 
     if(m_coralSensor.get() && hasCoral) {
       timerC_throw++;
-      if (m_coralSensor.get() && timerC_throw == delay) // periodic 20msde bir çağrılıyor, 1 saniye beklemek için 50 çağrı yapılmalı
+      if (m_coralSensor.get() && timerC_throw == coralDelay) // periodic 20msde bir çağrılıyor, 1 saniye beklemek için 50 çağrı yapılmalı
       {
         this.hasCoral = false;
         timerC_throw = 0;

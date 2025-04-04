@@ -47,7 +47,7 @@ public class ArmSubsystem extends SubsystemBase {
   private final MotionMagicVoltage m_secondJointMotionMagic = new MotionMagicVoltage(0).withSlot(0);
 
   private final ArmHalfEncoder m_firstJointHalfcoder = new ArmHalfEncoder(Arm.FirstJoint.kEncoderChannel, false, false);
-  private final ArmHalfEncoder m_secondJointHalfcoder = new ArmHalfEncoder(Arm.SecondJoint.kEncoderChannel, true, true);
+  private final ArmHalfEncoder m_secondJointHalfcoder = new ArmHalfEncoder(Arm.SecondJoint.kEncoderChannel, true, false);
 
   private final DCMotor armFirstJointDC = DCMotor.getKrakenX60(1);
   private final DCMotor armSecondJointDC = DCMotor.getKrakenX60(1);
@@ -246,7 +246,7 @@ public class ArmSubsystem extends SubsystemBase {
 
     if (m_offsetChooser.getSelected() < 10 && m_offsetChooser.getSelected() > -10) {
       if (m_offsetChooser != null) {
-        j2Offset = m_offsetChooser.getSelected()*6; 
+        j2Offset = m_offsetChooser.getSelected()*3; 
       } else j2Offset = 0;
     } else {
     if (m_offsetChooser.getSelected() > 10) j2Offset = 60;
@@ -320,9 +320,10 @@ public class ArmSubsystem extends SubsystemBase {
 
   public void reachGoal(double goalJ1, double goalJ2) 
   {
-    if(isArmReady && !isInitialReady && SmartDashboard.getNumber("Arm/J2/M-StartPos", 0) > 330 && 
+    if(isArmReady && !isInitialReady && SmartDashboard.getNumber("Arm/J2/M-StartPos", 0) > 120 && 
     SmartDashboard.getNumber("Arm/J1/M-StartPos", 0) > 160) 
             isInitialReady = true;
+
     if(isInitialReady)
     {
       if((goalJ1 > firstJointAngle &&  goalJ1 >= armJ1limitCCW) || firstJointAngle >= armJ1limitCCW + 8)
@@ -334,8 +335,13 @@ public class ArmSubsystem extends SubsystemBase {
         goalJ1 = armJ1limitCW;
       }
 
+      if(SmartDashboard.getNumber("Elevator/ElevatorHeight", 0.1) < 0.25 && goalJ1 < 90)
+            goalJ1 = 90;
+      
+
       SmartDashboard.putNumber("Arm/J1-Goal", goalJ1);
       isJ1GoalReached = (Math.abs(firstJointAngle - goalJ1) < Arm.FirstJoint.kAngleTolerance);
+
 
       m_armFirstJointMotor.setControl(m_firstJointMotionMagic.withPosition(Units.degreesToRotations(goalJ1)
       *Arm.FirstJoint.kArmReduction));

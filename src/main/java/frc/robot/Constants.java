@@ -31,7 +31,7 @@ public final class Constants {
   }
 
   public class InitialConstants {
-    public static final double[] EncoderStartAngles = {264.4/2,330/2};
+    public static final double[] EncoderStartAngles = {26.5/2,140/2};
     // **** Second joint should be equal to 355 at zeroing position
   }
 
@@ -83,8 +83,8 @@ public final class Constants {
       public static final double kArmJoint1_kSCL = 40;
       public static final double kArmJoint1_kSCLL = 15;
 
-      public static final double kArmJoint1_MMCV = 200; // Cruise Velocity
-      public static final double kArmJoint1_MMA = 200; // Acceleration
+      public static final double kArmJoint1_MMCV = 280; // Cruise Velocity
+      public static final double kArmJoint1_MMA = 250; // Acceleration
       public static final double kArmJoint1_MMJ = 0; // Jerk
 
       public static final double kDefaultArmSetpointDegrees = 75.0;
@@ -97,7 +97,7 @@ public final class Constants {
       public static final double kArmMass = 6.5; // Kilograms
       public static final double kArmLength = 0.350;
 
-      public static final double kMinAngle = 90;
+      public static final double kMinAngle = 45;
       public static final double kMaxAngle = 250;
 
       public static final double kMinAngleRads = Units.degreesToRadians(-180);        // For sim
@@ -135,20 +135,20 @@ public final class Constants {
       public static final double kArmJoint2_kSCL = 40;
       public static final double kArmJoint2_kSCLL = 15;
 
-      public static final int kArmJoint2_MMCV = 240; // Cruise Velocity
-      public static final int kArmJoint2_MMA = 140; // Acceleration
+      public static final int kArmJoint2_MMCV = 150; // Cruise Velocity
+      public static final int kArmJoint2_MMA = 100; // Acceleration
       public static final int kArmJoint2_MMJ = 0; // Jerk
       
       // distance per pulse = (angle per revolution) / (pulses per revolution)
       //  = (2 * PI rads) / (4096 pulses)
       public static final double kArmEncoderDistPerPulse = 2.0 * Math.PI / 4096;
 
-      public static final double kArmReduction = 112.92;
-      public static final double kPulleyErrorRatio = 0.4;
+      public static final double kArmReduction = 84.69;
+      public static final double kPulleyErrorRatio = 1/3;
       public static final double kArmMass = 4.0; // Kilograms
       public static final double kArmLength = 0.350;
 
-      public static final double kMinAngle = 90;
+      public static final double kMinAngle = 60;
       public static final double kMaxAngle = 250;
 
       public static final double kMinAngleRads = Units.degreesToRadians(-180);        // For sim
@@ -182,7 +182,7 @@ public final class Constants {
 
     public static final double kElevatorkS = 0.0; // volts (V)
     //public static final double kElevatorkG = 0.8; // volts (V)
-    public static final double kElevatorkG = -0.02; // ters yöne güç verince asansör yer çekimine karşı hareket ediyor değiştirmediysen bu kodda
+    public static final double kElevatorkG = 0.2; // ters yöne güç verince asansör yer çekimine karşı hareket ediyor değiştirmediysen bu kodda
     public static final double kElevatorkV = 0.0; // volt per velocity (V/(m/s))
     public static final double kElevatorkA = 0.0; // volt per acceleration (V/(m/s²))
 
@@ -202,31 +202,31 @@ public final class Constants {
     public static final double kSetpointMeters = 0.75;
     // Encoder is reset to measure 0 at the bottom, so minimum height is 0.
     public static final double kMinElevatorHeightMeters = 0.045;
-    public static final double kMaxElevatorHeightMeters = 1.45;
+    public static final double kMaxElevatorHeightMeters = 1.6;
     public static final double kElevatorTolerance = 0.03;
-    public static final double kReadyPos = 0.12;
+    public static final double kReadyPos = 0.04;
   }
 
   public class StatePositions
   {
     // Length, Angle 1, Angle 2
-
+    
     public static final double angleOffset = -7;
-    public static final double[] CoralIntake = {0.4, 180, 180};    //Coral Intake
-    public static final double[] CoralStage1 = {0.05, 150, 180};      //Coral Stage 1
-    public static final double[] CoralStage2 = {0.05, 160, 180};   //Coral Stage 2
-    public static final double[] CoralStage3 = {0.50, 180, 180};    //Coral Stage 3
-    public static final double[] CoralStage4 = {1.35, 180, 120};    //Coral Stage 4
-    public static final double[] CoralCarry = {0.32, 180, 160};    //Coral Carry
-    public static final double[] AlgaeThrowNet = {1.58, 180, 180};    //Algae Shoot
+    public static final double[] CoralIntake = {0.05, 206, 120};    //Coral Intake 217.5 110
+    public static final double[] CoralStage1 = {0.05, 150, 160};      //Coral Stage 1
+    public static final double[] CoralStage2 = {0.22, 150, 160};   //Coral Stage 2
+    public static final double[] CoralStage3 = {0.63, 150, 160};    //Coral Stage 3
+    public static final double[] CoralStage4 = {1.45, 150, 132};    //Coral Stage 4
+    public static final double[] CoralCarry = {0.1, 170, 180};    //Coral Carry
+    public static final double[] AlgaeThrowNet = {1.56, 180, 225};    //Algae Shoot
     public static final double[] AlgaeRecoverNet = {1.38, 190, 170};    //Algae Recover After Net
     public static final double[] AlgaeThrowProcessor = {0.09, 90, 230};    //Algae Shoot
-    public static final double[] AlgaeStage23 = {0.28, 180, 180};     //Algae Stage 2-3
-    public static final double[] AlgaeStage34 = {0.72, 180, 180};     //Algae Stage 3-4
-    public static final double[] AlgaeGround = {0.005, 120, 120};  //Algae Ground
+    public static final double[] AlgaeStage23 = {0.40, 120, 233};     //Algae Stage 2-3
+    public static final double[] AlgaeStage34 = {0.90, 120, 233};     //Algae Stage 3-4
+    public static final double[] AlgaeGround = {0.28, 45, 257.5};  //Algae Ground
     public static final double[] AlgaeFromCoral = {0.25, 180, 180};  //Algae Ground
-    public static final double[] AlgaeCarry = {0.3, 170, 190};  //Algae Ground
-    public static final double[] Closed = {0.07, 180, 180};  //Closed
+    public static final double[] AlgaeCarry = {0.5, 170, 210};  //Algae Ground
+    public static final double[] Closed = {0.5, 180, 180};  //Closed
     public static final double[] FullyClosed = {0.05, 180, 180};
 
   }
@@ -235,8 +235,8 @@ public final class Constants {
   {
     public static final double[] stage4Pos18R  = {3.15,3.95,0};
     public static final double[] stage3Pos18R  = {3.15,3.95,0};
-    public static final double[] stage4Pos18L  = {3.15,4.29,0};
-    public static final double[] stage3Pos18L  = {3.15,4.29,0};
+    public static final double[] stage4Pos18L  = {3.15,4.32,0};
+    public static final double[] stage3Pos18L  = {3.15,4.32,0};
     public static final double[] algae3Pos     = {2.84,3.8,0};
     public static final double[] algae2Pos     = {2.84,3.8,0};
     public static final double[] checkTagPos18 = {2.6,4,0};

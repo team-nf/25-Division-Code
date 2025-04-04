@@ -110,6 +110,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     
     if(goal < Elevator.kMinElevatorHeightMeters) goal = Elevator.kMinElevatorHeightMeters;
     else if(goal > Elevator.kMaxElevatorHeightMeters) goal = Elevator.kMaxElevatorHeightMeters;
+    //if(getElevatorHeight() > 0.6 && goal < 0.6) goal = 0.5;
     m_motor.setControl(m_motionMagic.withPosition(goal / (Elevator.kElevatorDrumRadius * 2 * Math.PI / Elevator.kElevatorGearing)));
     isGoalReached = (Math.abs(getElevatorHeight() - goal) < Elevator.kElevatorTolerance);
   }

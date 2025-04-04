@@ -94,9 +94,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final double initialDriveMultiplier = 0.7;
     private double driveMultiplier = initialDriveMultiplier;
 
-    private final Pose2d blueNetPose2d = new Pose2d(7.6, 6.5, new Rotation2d(Units.degreesToRadians(180)));
-    private final Pose2d redNetPose2d = new Pose2d(10, 2, new Rotation2d(0));
+    private final Pose2d blueNetPose2d = new Pose2d(7.6, 6.5, new Rotation2d(Units.degreesToRadians(0)));
+    private final Pose2d redNetPose2d = new Pose2d(10, 2, new Rotation2d(180));
 
+    private final SwerveRequest.RobotCentric roboDrive = new SwerveRequest.RobotCentric()
+    .withDeadband(MaxSpeed * 0.035)
+    .withDriveRequestType(DriveRequestType.Velocity);
 
     private final SwerveRequest.FieldCentricFacingAngle driveToPoint = new SwerveRequest.FieldCentricFacingAngle()
     .withDeadband(MaxSpeed * 0.035)
@@ -411,7 +414,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public PathConstraints getConstraints() {
         return new PathConstraints(
-            MetersPerSecond.of(3.6).in(MetersPerSecond), MetersPerSecondPerSecond.of(2.2).in(MetersPerSecondPerSecond),
+            MetersPerSecond.of(4.5).in(MetersPerSecond), MetersPerSecondPerSecond.of(3.5).in(MetersPerSecondPerSecond),
             RotationsPerSecond.of(180).in(RadiansPerSecond), RotationsPerSecondPerSecond.of(120).in(RadiansPerSecondPerSecond));
     }
 
@@ -456,7 +459,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             }
         }
         
-        return AutoBuilder.pathfindToPose(reefTargetPose2d, getTestConstraints());
+        return AutoBuilder.pathfindToPose(reefTargetPose2d, getConstraints());
     }
 
     public Command goToReefWithPID(int id, boolean isLeft, int stage)
@@ -557,7 +560,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             }
         }
 
-        return AutoBuilder.pathfindToPose(aprilTagTargetPose, getTestConstraints()).andThen(AutoBuilder.pathfindToPose(reefTargetPose2d, getConstraints()));
+        return AutoBuilder.pathfindToPose(aprilTagTargetPose, getConstraints()).andThen(AutoBuilder.pathfindToPose(reefTargetPose2d, getConstraints()));
     }
 
     public Command goToReefWithPath(int id, boolean isLeft, int stage)
@@ -737,7 +740,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         aprilTagTargetPose = aprilTagPose2d.transformBy(AutoConstants.RobotPosByTag);
 
-        return AutoBuilder.pathfindToPose(aprilTagTargetPose, getTestConstraints());
+        return AutoBuilder.pathfindToPose(aprilTagTargetPose, getConstraints());
     }
 
     public Command goToTagAuto(int id)
@@ -837,7 +840,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public Command goToPoint(double x, double y, double angle)
     {
-        return AutoBuilder.pathfindToPose(new Pose2d(x,y, new Rotation2d(Units.degreesToRadians(angle))), getTestConstraints());
+        return AutoBuilder.pathfindToPose(new Pose2d(x,y, new Rotation2d(Units.degreesToRadians(angle))), getConstraints());
     }
 
     public Command goToPointPID(Pose2d pose)
@@ -858,5 +861,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         }).until(() -> {
             return Math.abs(autoControllerX.getPositionError()) < errorLimit && Math.abs(autoControllerY.getPositionError()) < errorLimit;
         }).finallyDo(() -> {autoControllerX.reset();autoControllerY.reset();});
+    }
+
+    public Command getOut()
+    {
+        return run(() -> setControl(roboDrive.withVelocityX(-0.4))).withTimeout(0.5);
     }
 }
