@@ -20,7 +20,7 @@ public class AlgaeGroundCmd extends Command {
 
   private MainMechStateMachine m_mainMech;
   private CommandSwerveDrivetrain m_swerve;
-  private final String limelightName = ""; // Default Limelight name (empty string for "limelight")
+  private final String limelightName = "limelight-obj";
   
   // Constants for mapping
   private static final double TX_MIN = -29.8;
@@ -38,6 +38,7 @@ public class AlgaeGroundCmd extends Command {
   private double forwardVelocity = 0.0;
   private double mappedTX = 0.0;
   private double mappedTY = 0.0;
+  private double targetPointX = 0.0; // X coordinate of the target point on algae
 
   public AlgaeGroundCmd(MainMechStateMachine mainMech, CommandSwerveDrivetrain swerve) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -59,6 +60,7 @@ public class AlgaeGroundCmd extends Command {
     forwardVelocity = 0.0;
     mappedTX = 0.0;
     mappedTY = 0.0;
+    targetPointX = 0.0;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -99,6 +101,7 @@ public class AlgaeGroundCmd extends Command {
         
         // Map values and calculate control speeds
         if (selectedAlgae != null) {
+          calculateTargetPoint();
           calculateControlValues();
         }
       } else {
@@ -109,6 +112,61 @@ public class AlgaeGroundCmd extends Command {
       SmartDashboard.putNumber("LL_DetectionCount", 0);
       resetSelection();
     }
+  }
+  
+  /**
+   * Calculates the target point on the algae (20% from left edge to center)
+   */
+  private void calculateTargetPoint() {
+    // Calculate the leftmost and rightmost x coordinates
+    double leftX = Math.min(
+      Math.min(selectedAlgae.corner0_X, selectedAlgae.corner1_X),
+      Math.min(selectedAlgae.corner2_X, selectedAlgae.corner3_X)
+    );
+    
+    double rightX = Math.max(
+      Math.max(selectedAlgae.corner0_X, selectedAlgae.corner1_X),
+      Math.max(selectedAlgae.corner2_X, selectedAlgae.corner3_X)
+    );
+    
+    // Calculate center X
+    double centerX = (leftX + rightX) / 2.0;
+    
+    // Calculate target point X (20% from left edge to center - close to left side)
+    double targetX = leftX + (centerX - leftX) * 0.2;
+    
+    // Get Limelight resolution from JSON data
+    double resolutionX = 320.0; // Default fallback resolution
+    LimelightHelpers.LimelightResults results = LimelightHelpers.getLatestResults(limelightName);
+    if (results != null && results.error == null) {
+      // Try to extract resolution from JSON
+      String jsonData = LimelightHelpers.getJSONDump(limelightName);
+      if (jsonData != null && !jsonData.isEmpty()) {
+        // Look for width value in JSON data
+        int widthIndex = jsonData.indexOf("\"width\":");
+        if (widthIndex >= 0) {
+          try {
+            String widthStr = jsonData.substring(widthIndex + 8, jsonData.indexOf(",", widthIndex));
+            resolutionX = Double.parseDouble(widthStr);
+            SmartDashboard.putNumber("Limelight_ResolutionX", resolutionX);
+          } catch (Exception e) {
+            // Use default resolution if parsing fails
+          }
+        }
+      }
+    }
+    
+    // Calculate the angle to this point from camera center
+    // First convert from pixel coordinates to normalized coordinates
+    double normalizedX = (targetX / resolutionX) - 0.5;
+    
+    // Then convert to angular coordinates (approximation)
+    targetPointX = normalizedX * (TX_MAX - TX_MIN);
+    
+    // Display values for debugging
+    SmartDashboard.putNumber("Algae_LeftX", leftX);
+    SmartDashboard.putNumber("Algae_CenterX", centerX);
+    SmartDashboard.putNumber("Algae_TargetPointX", targetPointX);
   }
   
   /**
@@ -157,10 +215,10 @@ public class AlgaeGroundCmd extends Command {
    * Maps tx and ty values to (-1, 1) range and calculates control values
    */
   private void calculateControlValues() {
-    // Map TX from (TX_MIN, TX_MAX) to (-1, 1)
-    mappedTX = map(selectedAlgae.txnc, TX_MIN, TX_MAX, -1.0, 1.0);
+    // Map targetPointX from (TX_MIN, TX_MAX) to (-1, 1) for rotation
+    mappedTX = map(targetPointX, TX_MIN, TX_MAX, -1.0, 1.0);
     
-    // Map TY from (TY_MIN, TY_MAX) to (-1, 1)
+    // Map TY from (TY_MIN, TY_MAX) to (-1, 1) for forward motion
     mappedTY = map(selectedAlgae.tync, TY_MIN, TY_MAX, -1.0, 1.0);
     
     // Calculate control values
@@ -209,6 +267,7 @@ public class AlgaeGroundCmd extends Command {
     forwardVelocity = 0.0;
     mappedTX = 0.0;
     mappedTY = 0.0;
+    targetPointX = 0.0;
     
     SmartDashboard.putString("Algae_SelectionAlgorithm", "None");
     SmartDashboard.putNumber("Algae_Selected_ClassID", -1);
@@ -218,6 +277,9 @@ public class AlgaeGroundCmd extends Command {
     SmartDashboard.putNumber("Algae_MappedTY", 0);
     SmartDashboard.putNumber("Algae_RotationVelocity", 0);
     SmartDashboard.putNumber("Algae_ForwardVelocity", 0);
+    SmartDashboard.putNumber("Algae_LeftX", 0);
+    SmartDashboard.putNumber("Algae_CenterX", 0);
+    SmartDashboard.putNumber("Algae_TargetPointX", 0);
   }
 
   // Called once the command ends or is interrupted.
