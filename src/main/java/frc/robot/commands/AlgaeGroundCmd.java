@@ -13,6 +13,8 @@ import frc.robot.Constants.Elevator;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.DriveRequestType;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AlgaeGroundCmd extends Command {
@@ -70,6 +72,19 @@ public class AlgaeGroundCmd extends Command {
     
     // Get and process Limelight detections
     processLimelightDetections();
+    
+    // Apply movement if we have a valid algae target
+    if (selectedAlgae != null) {
+      // Create a robot-centric drive request
+      m_swerve.applyRequest(() -> 
+        new SwerveRequest.RobotCentric()
+          .withVelocityX(forwardVelocity * m_swerve.getMaxSpeed() * 0.5) // Forward/backward using the calculated velocity
+          .withVelocityY(0.0) // No side-to-side motion
+          .withRotationalRate(rotationVelocity * m_swerve.getMaxAngularRate()) // Rotation using the calculated velocity
+          .withDeadband(0.05)
+          .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
+      );
+    }
   }
 
   private void processLimelightDetections() {
@@ -136,25 +151,7 @@ public class AlgaeGroundCmd extends Command {
     double targetX = leftX + (centerX - leftX) * 0.2;
     
     // Get Limelight resolution from JSON data
-    double resolutionX = 320.0; // Default fallback resolution
-    LimelightHelpers.LimelightResults results = LimelightHelpers.getLatestResults(limelightName);
-    if (results != null && results.error == null) {
-      // Try to extract resolution from JSON
-      String jsonData = LimelightHelpers.getJSONDump(limelightName);
-      if (jsonData != null && !jsonData.isEmpty()) {
-        // Look for width value in JSON data
-        int widthIndex = jsonData.indexOf("\"width\":");
-        if (widthIndex >= 0) {
-          try {
-            String widthStr = jsonData.substring(widthIndex + 8, jsonData.indexOf(",", widthIndex));
-            resolutionX = Double.parseDouble(widthStr);
-            SmartDashboard.putNumber("Limelight_ResolutionX", resolutionX);
-          } catch (Exception e) {
-            // Use default resolution if parsing fails
-          }
-        }
-      }
-    }
+    double resolutionX = 960.0; // Default fallback resolution
     
     // Calculate the angle to this point from camera center
     // First convert from pixel coordinates to normalized coordinates
