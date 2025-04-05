@@ -106,7 +106,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("AlgaeCarry",     new AlgaeCarryCmd(m_mainMech));
     NamedCommands.registerCommand("AlgaeNet",       new AlgaeNetCmd(m_mainMech));
     NamedCommands.registerCommand("AlgaeProcessor", new AlgaeProCmd(m_mainMech));
-    NamedCommands.registerCommand("AlgaeGround",    new AlgaeGroundCmd(m_mainMech));
+    NamedCommands.registerCommand("AlgaeGround",    new AlgaeGroundCmd(m_mainMech, m_swerve));
 
 
 
