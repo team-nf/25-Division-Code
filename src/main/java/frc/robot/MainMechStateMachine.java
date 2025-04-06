@@ -3,6 +3,9 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
+import java.util.Arrays;
+import java.util.List;
+
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
@@ -45,6 +48,11 @@ public class MainMechStateMachine {
 
     private String lastState = "FullyClosed";
     private boolean isGoalReached = false;
+    private List<String> algaeStateList = Arrays.asList(
+        "ThrowAlgaeNet", "ThrowAlgaeProcessor", "AlgaeGround", "Algae23", "Algae34", "AlgaeCarry", "AlgaeGroundToCarry", "Algae34ToCarry");
+
+    private List<String> coralStateList = Arrays.asList(
+        "FullyClosed", "Closed", "CoralIntake", "CoralCarry", "CoralStage1", "CoralStage2", "CoralStage3", "CoralStage4");
 
     public MainMechStateMachine(ArmSubsystem armSubsystem, ElevatorSubsystem elevatorSubsystem, GripperSubsystem gripperSubsystem) {
         m_armSubsystem = armSubsystem;
@@ -66,8 +74,18 @@ public class MainMechStateMachine {
 
         if (lastState == "CoralIntake" && !(state == "FullyClosed" || state == "CoralIntake")) state = "FullyClosed";
 
+        if (lastState == "Algae34" && state != "Algae34") state = "Algae34ToCarry";
+
+        if (lastState == "AlgaeGround" && state != "AlgaeGround") state = "AlgaeGroundToCarry";
+
         if (m_gripperSubsystem.hasAlgae()) {
-            if (!java.util.Arrays.asList("ThrowAlgaeNet", "ThrowAlgaeProcessor", "AlgaeGround", "Algae23", "Algae34", "AlgaeCarry").contains(state)) {
+            if (!algaeStateList.contains(state)) {
+                state = lastState;
+            }
+        }
+
+        if (m_gripperSubsystem.hasCoral()) {
+            if (!coralStateList.contains(state)) {
                 state = lastState;
             }
         }
@@ -101,11 +119,17 @@ public class MainMechStateMachine {
             case "AlgaeGround":
                 AlgaeGround();
                 break;
+            case "AlgaeGroundToCarry":
+                AlgaeGroundToCarry();
+                break;
             case "Algae23":
                 Algae23();
                 break;
             case "Algae34":
                 Algae34();
+                break;
+            case "Algae34ToCarry":
+                Algae34ToCarry();
                 break;
             case "AlgaeCarry":
                 AlgaeCarry();
@@ -164,12 +188,20 @@ public class MainMechStateMachine {
         reachGoal(StatePositions.AlgaeGround[0], StatePositions.AlgaeGround[1], StatePositions.AlgaeGround[2]);
     }
 
+    public void AlgaeGroundToCarry() {
+        reachGoal(StatePositions.AlgaeGround[0], StatePositions.AlgaeCarry[1], StatePositions.AlgaeCarry[2]);
+    }
+
     public void Algae23() {
         reachGoal(StatePositions.AlgaeStage23[0], StatePositions.AlgaeStage23[1], StatePositions.AlgaeStage23[2]);
     }
 
     public void Algae34() {
         reachGoal(StatePositions.AlgaeStage34[0], StatePositions.AlgaeStage34[1], StatePositions.AlgaeStage34[2]);
+    }
+
+    public void Algae34ToCarry() {
+        reachGoal(StatePositions.AlgaeStage34[0], StatePositions.AlgaeCarry[1], StatePositions.AlgaeCarry[2]);
     }
 
     public void AlgaeCarry() {

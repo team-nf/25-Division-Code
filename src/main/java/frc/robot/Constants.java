@@ -222,10 +222,10 @@ public final class Constants {
     public static final double[] AlgaeRecoverNet = {1.38, 190, 170};    //Algae Recover After Net
     public static final double[] AlgaeThrowProcessor = {0.09, 90, 230};    //Algae Shoot
     public static final double[] AlgaeStage23 = {0.40, 120, 233};     //Algae Stage 2-3
-    public static final double[] AlgaeStage34 = {0.90, 120, 233};     //Algae Stage 3-4
+    public static final double[] AlgaeStage34 = {0.8, 120, 233};     //Algae Stage 3-4
     public static final double[] AlgaeGround = {0.28, 45, 257.5};  //Algae Ground
     public static final double[] AlgaeFromCoral = {0.25, 180, 180};  //Algae Ground
-    public static final double[] AlgaeCarry = {0.3, 150, 210};  //Algae Ground
+    public static final double[] AlgaeCarry = {0.25, 160, 210};  //Algae Ground
     public static final double[] Closed = {0.5, 180, 180};  //Closed
     public static final double[] FullyClosed = {0.01, 180, 180};
 
