@@ -62,6 +62,65 @@ public final class Constants {
 
   }
 
+  public static class GroundIntakeConstants {
+    // --- Motor IDs ---
+    public static final int kOuterWheelsMotorID = 40;
+    public static final int kInnerWheelsMasterMotorID = 41;
+    public static final int kInnerWheelsSlaveMotorID = 42;
+    public static final int kRotationMasterMotorID = 43;
+    public static final int kRotationSlaveMotorID = 44;
+
+    // --- Sensors ---
+    public static final int kObjectSensorID = 10;
+
+    // --- Wheel Diameters (in centimeters) ---
+    public static final double kOuterWheelDiameterCm = 10.0;
+    public static final double kInnerWheelDiameterCm = 5.0;
+
+    // --- Gearing (Motor Rotations per Mechanism Rotation) ---
+    public static final double kIntakeGearRatio = 1.0;
+    public static final double kRotationGearRatio = 50.0;
+
+    // --- Velocity PID for Intake Wheels ---
+    public static final double kIntakeVel_kP = 0.1;
+    public static final double kIntakeVel_kI = 0.0;
+    public static final double kIntakeVel_kD = 0.0;
+    public static final double kIntakeVel_kS = 0.1;
+    public static final double kIntakeVel_kV = 0.1;
+
+    // --- Position PID for Rotation ---
+    public static final double kRotationPos_kP = 1.0;
+    public static final double kRotationPos_kI = 0.0;
+    public static final double kRotationPos_kD = 0.0;
+    public static final double kRotationPos_kS = 0.1;
+    public static final double kRotationPos_kG = 0.2;
+
+    // --- Physical Limits (in cm/s) ---
+    public static final double kMaxIntakeObjectSpeedCmPerSec = 2000.0;
+    public static final double kMinIntakeObjectSpeedCmPerSec = 200.0;
+    
+    // --- Rotation Positions (in degrees) ---
+    public static final double kStartPositionDegrees = 0.0; // Inside the robot
+    public static final double kIntakePositionDegrees = 90.0; // Normal intake position
+    public static final double kDropPositionDegrees = 120.0; // Lower dropping position
+
+    // --- Rotation Limits (in degrees) ---
+    public static final double kMinAngleDegrees = -10.0; // Minimum allowed angle
+    public static final double kMaxAngleDegrees = 130.0; // Maximum allowed angle
+
+    // --- Rotation Tolerances (in degrees) ---
+    public static final double kAngleToleranceDegrees = 3.0; // Consider position reached within X degrees
+
+    // --- Motion Magic for Rotation ---
+    public static final double kRotationMMCV = 200.0; // Cruise Velocity
+    public static final double kRotationMMA = 150.0; // Acceleration
+    public static final double kRotationMMJ = 0.0; // Jerk
+
+    // --- Current and Voltage Limits ---
+    public static final double kCurrentLimit = 40.0; // Amps
+    public static final double kVoltageLimit = 10.0; // Volts
+  }
+
   public class Arm {
 
     public class FirstJoint {

@@ -24,6 +24,7 @@ import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GripperSubsystem;
+import frc.robot.subsystems.GroundIntakeSubsystem;
 import java.util.Optional;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
@@ -55,6 +56,7 @@ public class RobotContainer {
   private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
   private final ElevatorSubsystem m_elevatorSubsystem = new ElevatorSubsystem();
   private final GripperSubsystem m_gripperSubsystem = new GripperSubsystem();
+  private final GroundIntakeSubsystem m_groundIntakeSubsystem = new GroundIntakeSubsystem();
 
   private final MainMechStateMachine m_mainMech = new MainMechStateMachine(m_armSubsystem, m_elevatorSubsystem,
       m_gripperSubsystem);
@@ -205,6 +207,37 @@ public class RobotContainer {
     m_operatorController.share().whileTrue(NamedCommands.getCommand("Algae23"));
     m_operatorController.options().whileTrue(NamedCommands.getCommand("Algae34"));
 
+    // ------------------------------------------------------------
+    // GROUND INTAKE SUBSYSTEM BUTTON BINDINGS - CURRENTLY DISABLED
+    // ------------------------------------------------------------
+    /*
+    // Position Control
+    // Stowed position (inside robot)
+    m_operatorController.L1().onTrue(m_groundIntakeSubsystem.setIntakeStateCommand(GroundIntakeSubsystem.IntakeState.STOWED));
+    
+    // Normal intake position
+    m_operatorController.L2().onTrue(m_groundIntakeSubsystem.setIntakeStateCommand(GroundIntakeSubsystem.IntakeState.INTAKE));
+    
+    // Dropping position (lower)
+    m_operatorController.L3().onTrue(m_groundIntakeSubsystem.setIntakeStateCommand(GroundIntakeSubsystem.IntakeState.DROPPING));
+    
+    // Custom angle (75 degrees)
+    m_operatorController.square().onTrue(m_groundIntakeSubsystem.setRotationAngleCommand(75.0));
+    
+    // Wheel Control
+    // Intake with both inner and outer wheels (using robot speed of 200 cm/s)
+    m_operatorController.R1().whileTrue(m_groundIntakeSubsystem.intakeObjectCommand(200.0, true));
+    
+    // Intake with only outer wheels 
+    m_operatorController.R2().whileTrue(m_groundIntakeSubsystem.intakeObjectCommand(200.0, false));
+    
+    // Eject with all wheels
+    m_operatorController.R3().whileTrue(m_groundIntakeSubsystem.ejectObjectCommand(true));
+    
+    // Eject with only outer wheels
+    m_operatorController.triangle().whileTrue(m_groundIntakeSubsystem.ejectObjectCommand(false));
+    */
+    
     m_driverController.rightBumper()
         .whileTrue(m_swerve.applyRequest(() -> driveRobotCentric
             .withVelocityX(
