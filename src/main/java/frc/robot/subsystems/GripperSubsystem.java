@@ -30,8 +30,7 @@ public class GripperSubsystem extends SubsystemBase {
   private int timerA_throw = 0;
   private int timerC_throw = 0;
 
-  private final int algaeDelay = 30;
-  private final int coralDelay = 1; 
+  private final int algaeDelay = 20;
 
   private final DigitalInput m_AlgaeSensor = new DigitalInput(GripperConstants.kAlgaeSensor);
   private final DigitalInput m_coralSensor = new DigitalInput(GripperConstants.kCoralSensor);
@@ -114,28 +113,8 @@ public class GripperSubsystem extends SubsystemBase {
       if (timerA_throw != 0) timerA_throw = 0;
     }
 
-    if(!m_coralSensor.get() && !hasCoral) {
-      timerC_take++;
-      if (!m_coralSensor.get() && timerC_take == coralDelay) 
-      {
-        this.hasCoral = true;
-        timerC_take = 0;
-      };
-    } else {
-      if (timerC_take != 0) timerC_take = 0;
-    }
+    hasCoral = !m_coralSensor.get();
 
-    if(m_coralSensor.get() && hasCoral) {
-      timerC_throw++;
-      if (m_coralSensor.get() && timerC_throw == coralDelay) // periodic 20msde bir çağrılıyor, 1 saniye beklemek için 50 çağrı yapılmalı
-      {
-        this.hasCoral = false;
-        timerC_throw = 0;
-      };
-    } else {
-      if (timerC_throw != 0) timerC_throw = 0;
-    }
-    
     // Telemetry
     //SmartDashboard.putNumber("Current Velocity", the_hupletici.getVelocity().getValueAsDouble());
 

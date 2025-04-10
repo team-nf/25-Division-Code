@@ -106,10 +106,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     .withDriveRequestType(DriveRequestType.Velocity);
 
     PIDController autoControllerX = new PIDController(
-        1.5, 0.4, 0.2);
+        2.5, 0.8, 0.2);
     
     PIDController autoControllerY = new PIDController(
-        2, 0.4, 0.2);
+        2.5, 0.8, 0.2);
 
     private final PhoenixPIDController headingController = new PhoenixPIDController(2.5, 0., 0.);
 
@@ -310,8 +310,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         if (Robot.isReal())
         {
-            updateOdometryWithLL_mt2("limelight-r");
-            updateOdometryWithLL_mt2("limelight-l");
+            updateOdometryWithLL("limelight-r");
+            updateOdometryWithLL("limelight-l");
             //updateOdometryWithLL_mt1();
             publisher.set(new Pose3d(getState().Pose.getX(),getState().Pose.getY(),0, new Rotation3d(getState().Pose.getRotation())));
         }
@@ -323,9 +323,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 driveMultiplier = initialDriveMultiplier;
         else driveMultiplier = initialDriveMultiplier/2;
 
-        SmartDashboard.putNumber("SwerveSpeed", 
-            Math.sqrt(Math.pow(getState().Speeds.vxMetersPerSecond,2) + 
-                      Math.pow(getState().Speeds.vyMetersPerSecond,2)));
+        SmartDashboard.putNumber("PigeonVal", getPigeon2().getRotation2d().getDegrees());
     }
 
     private void startSimThread() {
@@ -627,6 +625,32 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         return AutoBuilder.pathfindToPose(aprilTagTargetPose, getConstraints());
     }
+
+    public void updateOdometryWithLL(String limelightName)
+    {
+        var driveState = getState();
+        double headingDeg = driveState.Pose.getRotation().getDegrees();
+        double omegaRps = Units.radiansToRotations(driveState.Speeds.omegaRadiansPerSecond);
+  
+        LimelightHelpers.SetRobotOrientation(limelightName, headingDeg, 0, 0, 0, 0, 0);
+        var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelightName);
+
+        String mt_state = "null";
+
+        if (llMeasurement != null && llMeasurement.tagCount > 0 && Math.abs(omegaRps) < 2 
+                && llMeasurement.avgTagDist < 3) 
+        {
+          if(llMeasurement.avgTagDist < AutoConstants.MT1_DIST)
+          {
+          llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName);
+          mt_state = "mt1";
+          }
+          else mt_state = "mt2";
+          addVisionMeasurement(llMeasurement.pose, llMeasurement.timestampSeconds);
+        }
+
+        SmartDashboard.putString(limelightName + "-LL-State", mt_state);
+    }
     
     public void updateOdometryWithLL_mt1(String limelightName) {
         boolean doRejectUpdate = false;
@@ -662,14 +686,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public void updateOdometryWithLL_mt2(String limelightName) {
         var driveState = getState();
-        double headingDeg = driveState.Pose.getRotation().getDegrees();
+        Rotation2d rot =  getState().Pose.getRotation(); 
+        double headingDeg = rot.getDegrees();
         double omegaRps = Units.radiansToRotations(driveState.Speeds.omegaRadiansPerSecond);
   
         LimelightHelpers.SetRobotOrientation(limelightName, headingDeg, 0, 0, 0, 0, 0);
         var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelightName);
         if (llMeasurement != null && llMeasurement.tagCount > 0 && Math.abs(omegaRps) < 2.5 
                 && llMeasurement.avgTagDist < 3) {
-          addVisionMeasurement(llMeasurement.pose, llMeasurement.timestampSeconds);
+
+          addVisionMeasurement(new Pose2d(llMeasurement.pose.getTranslation(), rot), llMeasurement.timestampSeconds);
         }
     }
 
@@ -744,6 +770,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public Command getOut()
     {
-        return run(() -> setControl(roboDrive.withVelocityX(-0.5))).withTimeout(0.5);
+        return run(() -> setControl(roboDrive.withVelocityX(-0.8))).withTimeout(0.5);
+    }
+
+    public void poseEstimatorConfig()
+    {
+        
     }
 }
