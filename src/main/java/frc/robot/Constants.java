@@ -31,7 +31,7 @@ public final class Constants {
   }
 
   public class InitialConstants {
-    public static final double[] EncoderStartAngles = {203.5/2,98/2};
+    public static final double[] EncoderStartAngles = {203.5/2,191.7/2};
     // **** Second joint should be equal to 355 at zeroing position
   }
 
@@ -83,8 +83,8 @@ public final class Constants {
       public static final double kArmJoint1_kSCL = 40;
       public static final double kArmJoint1_kSCLL = 15;
 
-      public static final double kArmJoint1_MMCV = 280; // Cruise Velocity
-      public static final double kArmJoint1_MMA = 250; // Acceleration
+      public static final double kArmJoint1_MMCV = 350; // Cruise Velocity
+      public static final double kArmJoint1_MMA = 300; // Acceleration
       public static final double kArmJoint1_MMJ = 0; // Jerk
 
       public static final double kDefaultArmSetpointDegrees = 75.0;
@@ -131,7 +131,7 @@ public final class Constants {
       public static final double kArmJoint2_kV = 0.0;
       public static final double kArmJoint2_kA = 0.0;
       public static final double kArmJoint2_kG = 0.08;
-      public static final double kArmJoint2_kPFV = 4;
+      public static final double kArmJoint2_kPFV = 8;
       public static final double kArmJoint2_kSCL = 40;
       public static final double kArmJoint2_kSCLL = 15;
 
@@ -212,7 +212,7 @@ public final class Constants {
     // Length, Angle 1, Angle 2
     
     public static final double angleOffset = -7;
-    public static final double[] CoralIntake = {0.025, 212, 107};    //Coral Intake 217.5 110
+    public static final double[] CoralIntake = {0.025, 212, 112};    //Coral Intake 217.5 110
     public static final double[] CoralStage1 = {0.05, 150, 160};      //Coral Stage 1
     public static final double[] CoralStage2 = {0.22, 150, 160};   //Coral Stage 2
     public static final double[] CoralStage3 = {0.63, 150, 160};    //Coral Stage 3
@@ -233,16 +233,16 @@ public final class Constants {
 
   public class AutoConstants
   {
-    public static final double[] stage4Pos18R   = {3.15,3.95,0};
-    public static final double[] stage3Pos18R   = {3.15,3.95,0};
-    public static final double[] stage4Pos18L   = {3.15,4.3,0};
-    public static final double[] stage3Pos18L   = {3.15,4.3,0};
+    public static final double[] stage4Pos18R   = {3.15,3.94,0};
+    public static final double[] stage3Pos18R   = {3.15,3.94,0};
+    public static final double[] stage4Pos18L   = {3.15,4.29,0};
+    public static final double[] stage3Pos18L   = {3.15,4.29,0};
     public static final double[] algae3Pos      = {2.9,4.1,0};
     public static final double[] algae2Pos      = {2.9,4.15,0};
     public static final double[] takeAlgaePos   = {3.15,4.15,0};
     public static final double[] checkTagPos18R = {2.85,3.95,0};
     public static final double[] checkTagPos18L = {2.85,4.25,0};
-    public static final double[] checkTagPos18  = {2.6,4.1,0};
+    public static final double[] checkTagPos18  = {2.5,4.1,0};
 
 
 
@@ -311,6 +311,7 @@ public final class Constants {
     public static final Transform2d IntakeCoralByTag =  new Transform2d(TAG13_POSE2D, intakeCoral13Pose2D);
 
     public static final double LL_Accuracy_mt1 = 0.03;
+    public static final double MT1_DIST = 0.7;
   }
 
 }

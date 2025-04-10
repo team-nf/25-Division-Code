@@ -84,11 +84,11 @@ public class MainMechStateMachine {
             }
         }
 
-        if (m_gripperSubsystem.hasCoral()) {
+        /*if (m_gripperSubsystem.hasCoral()) {
             if (!coralStateList.contains(state)) {
                 state = lastState;
             }
-        }
+        }*/
 
         lastState = state;
         switch (state) {
