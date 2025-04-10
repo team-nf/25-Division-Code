@@ -386,10 +386,8 @@ public class RobotContainer {
     // CORAL MODE <--> ALGAE MODE
 
     m_driverController.a().and(() -> {return isAlgaeSelected;}).whileTrue(
-        new ParallelCommandGroup(
-            NamedCommands.getCommand("AlgaeGround"),
-            NamedCommands.getCommand("AlgaeTrack")
-        )
+        NamedCommands.getCommand("AlgaeGround")
+        .andThen(NamedCommands.getCommand("AlgaeTrack"))
     );
     m_driverController.b().and(() -> {return isAlgaeSelected;}).whileTrue(NamedCommands.getCommand("AlgaeCarry"));
 
