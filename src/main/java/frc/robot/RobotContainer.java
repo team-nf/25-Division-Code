@@ -11,6 +11,7 @@ import frc.robot.commands.AlgaeCarryCmd;
 import frc.robot.commands.AlgaeGroundCmd;
 import frc.robot.commands.AlgaeNetCmd;
 import frc.robot.commands.AlgaeProCmd;
+import frc.robot.commands.AlgaeTrackCmd;
 import frc.robot.commands.ClosedCmd;
 import frc.robot.commands.ClosedFullyCmd;
 import frc.robot.commands.CoralCarryCmd;
@@ -113,7 +114,10 @@ public class RobotContainer {
     NamedCommands.registerCommand("AlgaeCarry", new AlgaeCarryCmd(m_mainMech));
     NamedCommands.registerCommand("AlgaeNet", new AlgaeNetCmd(m_mainMech));
     NamedCommands.registerCommand("AlgaeProcessor", new AlgaeProCmd(m_mainMech));
-    NamedCommands.registerCommand("AlgaeGround", new AlgaeGroundCmd(m_mainMech));
+    NamedCommands.registerCommand("AlgaeGround",    new AlgaeGroundCmd(m_mainMech));
+    NamedCommands.registerCommand("AlgaeTrack",     new AlgaeTrackCmd(m_swerve));
+
+
 
     NamedCommands.registerCommand("TakeCoralAuto", m_gripperSubsystem.TakeCoralAutoCommand());
     NamedCommands.registerCommand("ThrowCoralAuto", m_gripperSubsystem.ThrowCoralAutoCommand());
@@ -199,7 +203,12 @@ public class RobotContainer {
     m_operatorController.L1().whileTrue(NamedCommands.getCommand("FullyClosed"));
     m_operatorController.R1().whileTrue(NamedCommands.getCommand("AlgaeNet"));
     m_operatorController.L2().whileTrue(NamedCommands.getCommand("CoralIntake"));
-    m_operatorController.R2().whileTrue(NamedCommands.getCommand("AlgaeGround"));
+    m_operatorController.R2().whileTrue(
+        new ParallelCommandGroup(
+            NamedCommands.getCommand("AlgaeGround"),
+            NamedCommands.getCommand("AlgaeTrack")
+        )
+    );
     m_operatorController.L3().whileTrue(NamedCommands.getCommand("CoralCarry"));
     m_operatorController.R3().whileTrue(NamedCommands.getCommand("AlgaeCarry"));
     m_operatorController.share().whileTrue(NamedCommands.getCommand("Algae23"));
@@ -708,12 +717,11 @@ public class RobotContainer {
 
     // CORAL MODE <--> ALGAE MODE
 
-    m_driverController.a().and(() -> {
-      return isAlgaeSelected;
-    }).whileTrue(NamedCommands.getCommand("AlgaeGround"));
-    m_driverController.b().and(() -> {
-      return isAlgaeSelected;
-    }).whileTrue(NamedCommands.getCommand("AlgaeCarry"));
+    m_driverController.a().and(() -> {return isAlgaeSelected;}).whileTrue(
+        NamedCommands.getCommand("AlgaeGround")
+        .andThen(NamedCommands.getCommand("AlgaeTrack"))
+    );
+    m_driverController.b().and(() -> {return isAlgaeSelected;}).whileTrue(NamedCommands.getCommand("AlgaeCarry"));
 
     m_driverController.x().and(() -> {
       return isAlgaeSelected;
