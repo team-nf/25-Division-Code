@@ -114,8 +114,8 @@ public class AlgaeTrackCmd extends Command {
         double mappedTX = map(targetPointX, TX_MIN, TX_MAX, -1.0, 1.0);
         double mappedTY = map(selectedAlgae.tync, TY_MIN, TY_MAX, 0.0, 1.0);
         
-        rotationVelocity = -rotationPID.calculate(mappedTX, 0); // Target is center (0)
-        forwardVelocity = -forwardPID.calculate(mappedTY, 0);   // Target is 0 (minimum distance)
+        rotationVelocity = rotationPID.calculate(mappedTX, 0); // Target is center (0)
+        forwardVelocity = forwardPID.calculate(mappedTY, 0);   // Target is 0 (minimum distance)
       } else {
         // Use simple P controller
         double[] controlValues = calculateControlValues(targetPointX, selectedAlgae.tync);
@@ -494,6 +494,7 @@ public class AlgaeTrackCmd extends Command {
   @Override
   public boolean isFinished() {
     // End only when parent commands end it
+    
     return false;
   }
 } 

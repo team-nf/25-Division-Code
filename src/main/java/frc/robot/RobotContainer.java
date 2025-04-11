@@ -21,7 +21,6 @@ import frc.robot.commands.L2Cmd;
 import frc.robot.commands.L3Cmd;
 import frc.robot.commands.L4Cmd;
 import frc.robot.commands.L4PreCmd;
-import frc.robot.custom.LedController;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -60,7 +59,6 @@ public class RobotContainer {
   private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
   private final ElevatorSubsystem m_elevatorSubsystem = new ElevatorSubsystem();
   private final GripperSubsystem m_gripperSubsystem = new GripperSubsystem();
-  private final LedController m_ledController = new LedController(2);
 
   private final MainMechStateMachine m_mainMech = new MainMechStateMachine(m_armSubsystem, m_elevatorSubsystem,
       m_gripperSubsystem);
@@ -107,7 +105,6 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the trigger bindings
 
-    m_ledController.setLedsRed();
 
     NamedCommands.registerCommand("Closed", new ClosedCmd(m_mainMech));
     NamedCommands.registerCommand("FullyClosed", new ClosedFullyCmd(m_mainMech));
@@ -728,14 +725,12 @@ public class RobotContainer {
         new ParallelCommandGroup(
             NamedCommands.getCommand("AlgaeGround"),
             new WaitCommand(2)
-              .andThen(NamedCommands.getCommand("AlgaeTrack")
-              .until(m_gripperSubsystem::hasAlgae))
+              .andThen(
+                NamedCommands.getCommand("AlgaeTrack")
+                .until(m_gripperSubsystem::hasAlgae)
+              )
         )
-        // NamedCommands.getCommand("AlgaeGround")
-        // .andThen(() -> System.out.println("AlgaeGround"))
-        // .andThen(() -> SmartDashboard.putBoolean("AlgaeGroundFinished", true))
-        // .andThen(NamedCommands.getCommand("AlgaeTrack"))
-    );
+      );
     m_driverController.b().and(() -> {return isAlgaeSelected;}).whileTrue(NamedCommands.getCommand("AlgaeCarry"));
 
     m_driverController.x().and(() -> {
