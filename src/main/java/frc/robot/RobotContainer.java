@@ -721,16 +721,16 @@ public class RobotContainer {
 
     // CORAL MODE <--> ALGAE MODE
 
-    m_driverController.a().and(() -> {return isAlgaeSelected;}).whileTrue(
-        new ParallelCommandGroup(
-            NamedCommands.getCommand("AlgaeGround"),
-            new WaitCommand(2)
-              .andThen(
-                NamedCommands.getCommand("AlgaeTrack")
-                .until(m_gripperSubsystem::hasAlgae)
-              )
-        )
-      );
+    m_driverController.a().and(() -> {return isAlgaeSelected;}).whileTrue(NamedCommands.getCommand("AlgaeGround"));
+    m_driverController.a().and(m_mainMech::isAlgaeGround)
+          .whileTrue(NamedCommands.getCommand("AlgaeTrack")
+                     .until(m_gripperSubsystem::hasAlgae));
+    m_driverController.a().and(m_mainMech::isAlgaeGround).onTrue(m_gripperSubsystem.takeAlgae());
+    m_driverController.a().and(m_mainMech::isAlgaeGround).and(m_gripperSubsystem::hasAlgae)
+                          .onTrue(NamedCommands.getCommand("AlgaeCarry")
+                                  .alongWith(m_swerve.getOut()));
+    
+
     m_driverController.b().and(() -> {return isAlgaeSelected;}).whileTrue(NamedCommands.getCommand("AlgaeCarry"));
 
     m_driverController.x().and(() -> {

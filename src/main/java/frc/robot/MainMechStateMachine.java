@@ -276,4 +276,11 @@ public class MainMechStateMachine {
         SmartDashboard.putString("MechState", lastState);
         SmartDashboard.putBoolean("MechGoalReached", isGoalReached);
     }
+    
+
+    public boolean isAlgaeGround()
+    {
+        return armJ1Angle < StatePositions.AlgaeGround[1] * 1.25 
+                    && eleGeneralHeight > StatePositions.AlgaeGround[0] * 0.75;
+    }
 }
