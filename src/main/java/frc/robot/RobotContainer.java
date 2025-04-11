@@ -41,6 +41,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -182,6 +183,7 @@ public class RobotContainer {
     SmartDashboard.putData("ColorSelect", m_isColorBlue);
     SmartDashboard.putData("AlgaeMode", m_isAlgaeMode);
     SmartDashboard.putData("IntakeSelect", m_checkIntake);
+    SmartDashboard.putBoolean("AlgaeGroundFinished", true);
 
     m_mainMech.resetMechanisms();
   }
@@ -723,8 +725,16 @@ public class RobotContainer {
     // CORAL MODE <--> ALGAE MODE
 
     m_driverController.a().and(() -> {return isAlgaeSelected;}).whileTrue(
-        NamedCommands.getCommand("AlgaeGround")
-        .andThen(NamedCommands.getCommand("AlgaeTrack"))
+        new ParallelCommandGroup(
+            NamedCommands.getCommand("AlgaeGround"),
+            new WaitCommand(2)
+              .andThen(NamedCommands.getCommand("AlgaeTrack")
+              .until(m_gripperSubsystem::hasAlgae))
+        )
+        // NamedCommands.getCommand("AlgaeGround")
+        // .andThen(() -> System.out.println("AlgaeGround"))
+        // .andThen(() -> SmartDashboard.putBoolean("AlgaeGroundFinished", true))
+        // .andThen(NamedCommands.getCommand("AlgaeTrack"))
     );
     m_driverController.b().and(() -> {return isAlgaeSelected;}).whileTrue(NamedCommands.getCommand("AlgaeCarry"));
 

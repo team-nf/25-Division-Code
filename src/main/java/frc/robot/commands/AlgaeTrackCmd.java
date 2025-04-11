@@ -35,7 +35,7 @@ public class AlgaeTrackCmd extends Command {
   private static SelectionAlgorithm currentAlgorithm = SelectionAlgorithm.LOWEST_FIRST;
   private boolean enableRectangularCheck = true;
   private boolean enableAreaRatioCheck = true;
-  private boolean usePIDController = false;
+  private boolean usePIDController = true;
   
   // Target point in bounding box using Cartesian coordinates (-1 to 1, -1 to 1)
   // where (0,0) is center, (-1,0) is left center, (1,0) is right center
@@ -75,7 +75,7 @@ public class AlgaeTrackCmd extends Command {
     // Set input range for rotation PID (helps with wrap-around)
     rotationPID.enableContinuousInput(-1.0, 1.0);
     
-    double maxSpeed = MetersPerSecond.of(5).in(MetersPerSecond);
+    double maxSpeed = MetersPerSecond.of(1).in(MetersPerSecond);
     roboDrive = new SwerveRequest.RobotCentric()
       .withDeadband(maxSpeed * 0.035)
       .withDriveRequestType(DriveRequestType.Velocity);
@@ -83,6 +83,11 @@ public class AlgaeTrackCmd extends Command {
 
   @Override
   public void initialize() {
+    SmartDashboard.putNumber("Algae_ForwardVelocity", 0);
+    SmartDashboard.putNumber("Algae_RotationVelocity", 0);
+    SmartDashboard.putBoolean("Algae_UsingPID", false);
+    SmartDashboard.putBoolean("LL_HasTarget", false);
+
     // Set limelight pipeline for neural detection and reset tracking
     LimelightHelpers.setPipelineIndex(limelightName, 0);
     selectedAlgae = null;
@@ -483,7 +488,7 @@ public class AlgaeTrackCmd extends Command {
   public void end(boolean interrupted) {
     // Stop the drivetrain when command ends
     selectedAlgae = null;
-    m_swerve.setControl(roboDrive.withVelocityX(0).withVelocityY(0).withRotationalRate(0));
+    // m_swerve.setControl(roboDrive.withVelocityX(0).withVelocityY(0).withRotationalRate(0));
   }
 
   @Override
