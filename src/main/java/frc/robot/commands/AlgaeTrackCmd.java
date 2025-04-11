@@ -35,7 +35,6 @@ public class AlgaeTrackCmd extends Command {
   private static SelectionAlgorithm currentAlgorithm = SelectionAlgorithm.LOWEST_FIRST;
   private boolean enableRectangularCheck = true;
   private boolean enableAreaRatioCheck = true;
-  private boolean usePIDController = true;
   
   // Target point in bounding box using Cartesian coordinates (-1 to 1, -1 to 1)
   // where (0,0) is center, (-1,0) is left center, (1,0) is right center
@@ -75,7 +74,7 @@ public class AlgaeTrackCmd extends Command {
     // Set input range for rotation PID (helps with wrap-around)
     rotationPID.enableContinuousInput(-1.0, 1.0);
     
-    double maxSpeed = MetersPerSecond.of(1).in(MetersPerSecond);
+    double maxSpeed = MetersPerSecond.of(1.5).in(MetersPerSecond);
     roboDrive = new SwerveRequest.RobotCentric()
       .withDeadband(maxSpeed * 0.035)
       .withDriveRequestType(DriveRequestType.Velocity);
@@ -83,10 +82,33 @@ public class AlgaeTrackCmd extends Command {
 
   @Override
   public void initialize() {
+    // Initialize SmartDashboard values
     SmartDashboard.putNumber("Algae_ForwardVelocity", 0);
     SmartDashboard.putNumber("Algae_RotationVelocity", 0);
-    SmartDashboard.putBoolean("Algae_UsingPID", false);
+    SmartDashboard.putNumber("LL_TX", 0);
+    SmartDashboard.putNumber("LL_TY", 0);
+    SmartDashboard.putNumber("LL_TA", 0);
+    SmartDashboard.putString("LL_DetectorClass", "");
+    SmartDashboard.putNumber("LL_DetectorClassIndex", 0);
+    SmartDashboard.putString("Algae_Algorithm", currentAlgorithm.toString());
+    SmartDashboard.putBoolean("Algae_EnableRectCheck", enableRectangularCheck);
+    SmartDashboard.putBoolean("Algae_EnableAreaCheck", enableAreaRatioCheck);
+    SmartDashboard.putNumber("Algae_TargetOffsetX", targetOffsetX);
+    SmartDashboard.putNumber("Algae_TargetOffsetY", targetOffsetY);
+    SmartDashboard.putNumber("Algae_AreaRatio", 0);
+    SmartDashboard.putNumber("Algae_LeftX", 0);
+    SmartDashboard.putNumber("Algae_TargetX", 0);
+    SmartDashboard.putNumber("Algae_TargetY", 0);
+    SmartDashboard.putNumber("Algae_TargetPointX", 0);
+    SmartDashboard.putNumber("Algae_TargetPointY", 0);
+    SmartDashboard.putNumber("Algae_MappedTX", 0);
+    SmartDashboard.putNumber("Algae_MappedTY", 0);
     SmartDashboard.putBoolean("LL_HasTarget", false);
+    SmartDashboard.putNumber("LL_DetectionCount", 0);
+    SmartDashboard.putNumber("Algae_Selected_ClassID", -1);
+    SmartDashboard.putNumber("Algae_Selected_TX", 0);
+    SmartDashboard.putNumber("Algae_Selected_TY", 0);
+    SmartDashboard.putNumber("Algae_Selected_Area", 0);
 
     // Set limelight pipeline for neural detection and reset tracking
     LimelightHelpers.setPipelineIndex(limelightName, 0);
@@ -104,29 +126,20 @@ public class AlgaeTrackCmd extends Command {
     
     if (selectedAlgae != null) {
       // Calculate drive values
-      double targetPointX = calculateTargetPoint(selectedAlgae);
+      double[] targetPoint = calculateTargetPoint(selectedAlgae);
       
-      double forwardVelocity;
-      double rotationVelocity;
+      // Use PID controllers
+      double mappedTX = map(targetPoint[0], TX_MIN, TX_MAX, -1.0, 1.0);
+      double mappedTY = map(targetPoint[1], TY_MIN, TY_MAX, 0.0, 1.0);
       
-      if (usePIDController) {
-        // Use PID controllers
-        double mappedTX = map(targetPointX, TX_MIN, TX_MAX, -1.0, 1.0);
-        double mappedTY = map(selectedAlgae.tync, TY_MIN, TY_MAX, 0.0, 1.0);
-        
-        rotationVelocity = rotationPID.calculate(mappedTX, 0); // Target is center (0)
-        forwardVelocity = forwardPID.calculate(mappedTY, 0);   // Target is 0 (minimum distance)
-      } else {
-        // Use simple P controller
-        double[] controlValues = calculateControlValues(targetPointX, selectedAlgae.tync);
-        forwardVelocity = controlValues[0];
-        rotationVelocity = controlValues[1];
-      }
+      double rotationVelocity = rotationPID.calculate(mappedTX, 0); // Target is center (0)
+      double forwardVelocity = forwardPID.calculate(mappedTY, 0);   // Target is 0 (minimum distance)
       
       // Log control values
       SmartDashboard.putNumber("Algae_ForwardVelocity", forwardVelocity);
       SmartDashboard.putNumber("Algae_RotationVelocity", rotationVelocity);
-      SmartDashboard.putBoolean("Algae_UsingPID", usePIDController);
+      SmartDashboard.putNumber("Algae_MappedTX", mappedTX);
+      SmartDashboard.putNumber("Algae_MappedTY", mappedTY);
       
       // Drive robot using calculated velocities
       m_swerve.setControl(
@@ -193,7 +206,7 @@ public class AlgaeTrackCmd extends Command {
     SmartDashboard.putNumber("Algae_TargetOffsetY", targetOffsetY);
   }
   
-  private double calculateTargetPoint(RawDetection detection) {
+  private double[] calculateTargetPoint(RawDetection detection) {
     // Calculate bounding box dimensions and center
     double[] dimensions = getBoundingBoxDimensions(detection);
     double width = dimensions[0];
@@ -216,20 +229,26 @@ public class AlgaeTrackCmd extends Command {
     targetY = Math.max(minY, Math.min(maxY, targetY));
     
     // Convert to angular coordinates
-    double resolutionX = 960.0;
+    double[] resolution = getLimelightResolution();
+    double resolutionX = resolution[0];
+    double resolutionY = resolution[1];
+    
     double normalizedX = (targetX / resolutionX) - 0.5;
+    double normalizedY = (targetY / resolutionY) - 0.5;
+    
     double targetPointX = normalizedX * (TX_MAX - TX_MIN);
+    double targetPointY = normalizedY * (TY_MAX - TY_MIN);
     
     // Log for debugging
     SmartDashboard.putNumber("Algae_LeftX", minX);
-    SmartDashboard.putNumber("Algae_CenterX", centerX);
     SmartDashboard.putNumber("Algae_TargetX", targetX);
     SmartDashboard.putNumber("Algae_TargetY", targetY);
     SmartDashboard.putNumber("Algae_TargetPointX", targetPointX);
+    SmartDashboard.putNumber("Algae_TargetPointY", targetPointY);
     SmartDashboard.putNumber("Algae_TargetOffsetX", targetOffsetX);
     SmartDashboard.putNumber("Algae_TargetOffsetY", targetOffsetY);
     
-    return targetPointX;
+    return new double[] {targetPointX, targetPointY};
   }
   
   private boolean isBoxSquarish(RawDetection detection) {
@@ -407,22 +426,6 @@ public class AlgaeTrackCmd extends Command {
     }
   }
   
-  private double[] calculateControlValues(double targetX, double targetY) {
-    // Map vision coordinates to robot control values
-    double mappedTX = map(targetX, TX_MIN, TX_MAX, -1.0, 1.0);
-    double mappedTY = map(targetY, TY_MIN, TY_MAX, 0.0, 1.0);
-    
-    // Calculate control values for driving
-    double forwardVelocity = -mappedTY * kForwardP;
-    double rotationVelocity = -mappedTX * kRotationP;
-    
-    // Log for debugging
-    SmartDashboard.putNumber("Algae_MappedTX", mappedTX);
-    SmartDashboard.putNumber("Algae_MappedTY", mappedTY);
-    
-    return new double[] {forwardVelocity, rotationVelocity};
-  }
-  
   private double map(double value, double inMin, double inMax, double outMin, double outMax) {
     // Map a value from one range to another
     value = Math.max(inMin, Math.min(inMax, value));
@@ -446,9 +449,10 @@ public class AlgaeTrackCmd extends Command {
       SmartDashboard.putNumber("Algae_MappedTY", 0);
       SmartDashboard.putNumber("Algae_RotationVelocity", 0);
       SmartDashboard.putNumber("Algae_ForwardVelocity", 0);
-      SmartDashboard.putNumber("Algae_LeftX", 0);
       SmartDashboard.putNumber("Algae_CenterX", 0);
+      SmartDashboard.putNumber("Algae_CenterY", 0);
       SmartDashboard.putNumber("Algae_TargetPointX", 0);
+      SmartDashboard.putNumber("Algae_TargetPointY", 0);
     }
   }
   
@@ -463,16 +467,6 @@ public class AlgaeTrackCmd extends Command {
   
   public void setAreaRatioCheckEnabled(boolean enabled) {
     enableAreaRatioCheck = enabled;
-  }
-  
-  public void setPIDEnabled(boolean enabled) {
-    usePIDController = enabled;
-    
-    // Reset PID controllers when switching
-    if (enabled) {
-      rotationPID.reset();
-      forwardPID.reset();
-    }
   }
   
   // Methods to configure PID values
