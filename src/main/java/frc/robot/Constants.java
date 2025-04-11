@@ -5,6 +5,8 @@
 package frc.robot;
 
 
+import java.security.PublicKey;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -79,12 +81,12 @@ public final class Constants {
       public static final double kArmJoint1_kV = 0.0;
       public static final double kArmJoint1_kA = 0.0;
       public static final double kArmJoint1_kG = 0.05;
-      public static final double kArmJoint1_kPFV = 4;
+      public static final double kArmJoint1_kPFV = 7;
       public static final double kArmJoint1_kSCL = 40;
       public static final double kArmJoint1_kSCLL = 15;
 
-      public static final double kArmJoint1_MMCV = 350; // Cruise Velocity
-      public static final double kArmJoint1_MMA = 300; // Acceleration
+      public static final double kArmJoint1_MMCV = 450; // Cruise Velocity
+      public static final double kArmJoint1_MMA = 325; // Acceleration
       public static final double kArmJoint1_MMJ = 0; // Jerk
 
       public static final double kDefaultArmSetpointDegrees = 75.0;
@@ -131,12 +133,12 @@ public final class Constants {
       public static final double kArmJoint2_kV = 0.0;
       public static final double kArmJoint2_kA = 0.0;
       public static final double kArmJoint2_kG = 0.08;
-      public static final double kArmJoint2_kPFV = 8;
+      public static final double kArmJoint2_kPFV = 7;
       public static final double kArmJoint2_kSCL = 40;
       public static final double kArmJoint2_kSCLL = 15;
 
-      public static final int kArmJoint2_MMCV = 150; // Cruise Velocity
-      public static final int kArmJoint2_MMA = 100; // Acceleration
+      public static final int kArmJoint2_MMCV = 275; // Cruise Velocity
+      public static final int kArmJoint2_MMA = 400; // Acceleration
       public static final int kArmJoint2_MMJ = 0; // Jerk
       
       // distance per pulse = (angle per revolution) / (pulses per revolution)
@@ -149,14 +151,14 @@ public final class Constants {
       public static final double kArmLength = 0.350;
 
       public static final double kMinAngle = 60;
-      public static final double kMaxAngle = 250;
+      public static final double kMaxAngle = 290;
 
       public static final double kMinAngleRads = Units.degreesToRadians(-180);        // For sim
       public static final double kMaxAngleRads = Units.degreesToRadians(180); // For sim
 
       public static final double[] kSimOffsets = {0.091,0.007,0.275};
       
-      public static final double kAngleTolerance = 4;
+      public static final double kAngleTolerance = 15;
       public static final double kArmSafetyFactor = 1;
     }
 
@@ -196,15 +198,17 @@ public final class Constants {
     public static final double kElevatorDistPerRotation = 0.02;
     public static final double kCarriageMass = 13.0; // kg
 
-    public static final double kAmpLimit = 38.0;
-    public static final double kVoltageLimit = 10.0;
+    public static final double kAmpLimit = 37.5;
+    public static final double kVoltageLimit = 9;
 
     public static final double kSetpointMeters = 0.75;
     // Encoder is reset to measure 0 at the bottom, so minimum height is 0.
     public static final double kMinElevatorHeightMeters = 0.009;
     public static final double kMaxElevatorHeightMeters = 1.6;
-    public static final double kElevatorTolerance = 0.03;
+    public static final double kElevatorTolerance = 0.04;
     public static final double kReadyPos = 0.04;
+
+    public static final double minHeightForL4 = 0.25;
   }
 
   public class StatePositions
@@ -216,17 +220,18 @@ public final class Constants {
     public static final double[] CoralStage1 = {0.05, 150, 160};      //Coral Stage 1
     public static final double[] CoralStage2 = {0.22, 150, 160};   //Coral Stage 2
     public static final double[] CoralStage3 = {0.63, 150, 160};    //Coral Stage 3
-    public static final double[] CoralStage4 = {1.45, 150, 132};    //Coral Stage 4
-    public static final double[] CoralCarry = {0.1, 170, 180};    //Coral Carry
+    public static final double[] CoralStage4 = {1.45, 152, 135};    //Coral Stage 4
+    public static final double[] CoralStage4Pre = {1.45, 160, 152};    //Coral Stage 4
+    public static final double[] CoralCarry = {0.025, 180, 160};    //Coral Carry
     public static final double[] AlgaeThrowNet = {1.56, 180, 225};    //Algae Shoot
     public static final double[] AlgaeRecoverNet = {1.38, 190, 170};    //Algae Recover After Net
-    public static final double[] AlgaeThrowProcessor = {0.09, 90, 230};    //Algae Shoot
+    public static final double[] AlgaeThrowProcessor = {0.02, 90, 280};    //Algae Shoot
     public static final double[] AlgaeStage23 = {0.40, 120, 233};     //Algae Stage 2-3
     public static final double[] AlgaeStage34 = {0.8, 120, 233};     //Algae Stage 3-4
     public static final double[] AlgaeGround = {0.28, 45, 257.5};  //Algae Ground
     public static final double[] AlgaeFromCoral = {0.25, 180, 180};  //Algae Ground
     public static final double[] AlgaeCarry = {0.25, 160, 210};  //Algae Ground
-    public static final double[] Closed = {0.5, 180, 180};  //Closed
+    public static final double[] Closed = {0.06, 180, 180};  //Closed
     public static final double[] FullyClosed = {0.01, 180, 180};
 
   }
@@ -240,8 +245,8 @@ public final class Constants {
     public static final double[] algae3Pos      = {2.9,4.1,0};
     public static final double[] algae2Pos      = {2.9,4.15,0};
     public static final double[] takeAlgaePos   = {3.15,4.15,0};
-    public static final double[] checkTagPos18R = {2.85,3.95,0};
-    public static final double[] checkTagPos18L = {2.85,4.25,0};
+    public static final double[] checkTagPos18R = {2.75,3.95,0};
+    public static final double[] checkTagPos18L = {2.75,4.25,0};
     public static final double[] checkTagPos18  = {2.5,4.1,0};
 
 
@@ -311,7 +316,14 @@ public final class Constants {
     public static final Transform2d IntakeCoralByTag =  new Transform2d(TAG13_POSE2D, intakeCoral13Pose2D);
 
     public static final double LL_Accuracy_mt1 = 0.03;
-    public static final double MT1_DIST = 0.7;
+    public static final double MT1_DIST = 0.8;
+  }
+
+  public class PathConstants
+  {
+    public static final double velocity = 4.5;
+    public static final double acceleration = 5.2;
+
   }
 
 }

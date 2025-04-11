@@ -51,11 +51,13 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.AutoConstants;
+import frc.robot.Constants.PathConstants;
 import frc.robot.LimelightHelpers;
 import frc.robot.Robot;
 import frc.robot.Telemetry;
@@ -91,6 +93,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     StructPublisher<Pose3d> publisher = NetworkTableInstance.getDefault()
       .getStructTopic("3dSim/fakeRobot", Pose3d.struct).publish();
 
+    private final Field2d m_field = new Field2d();
+
     private final double initialDriveMultiplier = 0.7;
     private double driveMultiplier = initialDriveMultiplier;
 
@@ -111,9 +115,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     PIDController autoControllerY = new PIDController(
         2.5, 0.8, 0.2);
 
-    private final PhoenixPIDController headingController = new PhoenixPIDController(2.5, 0., 0.);
+    private final PhoenixPIDController headingController = new PhoenixPIDController(2, 0., 0.);
 
-    private final double errorLimit = 0.01;
+    private final double errorLimit = 0.025;
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -324,6 +328,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         else driveMultiplier = initialDriveMultiplier/2;
 
         SmartDashboard.putNumber("PigeonVal", getPigeon2().getRotation2d().getDegrees());
+        m_field.setRobotPose(getState().Pose);
+        SmartDashboard.putData("Field", m_field);
     }
 
     private void startSimThread() {
@@ -416,7 +422,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public PathConstraints getConstraints() {
         return new PathConstraints(
-            MetersPerSecond.of(4.2).in(MetersPerSecond), MetersPerSecondPerSecond.of(4.2).in(MetersPerSecondPerSecond),
+            MetersPerSecond.of(PathConstants.velocity).in(MetersPerSecond), MetersPerSecondPerSecond.of(PathConstants.acceleration).in(MetersPerSecondPerSecond),
             RotationsPerSecond.of(180).in(RadiansPerSecond), RotationsPerSecondPerSecond.of(120).in(RadiansPerSecondPerSecond));
     }
 
@@ -631,6 +637,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         var driveState = getState();
         double headingDeg = driveState.Pose.getRotation().getDegrees();
         double omegaRps = Units.radiansToRotations(driveState.Speeds.omegaRadiansPerSecond);
+        double driveSpeed = Math.hypot(driveState.Speeds.vxMetersPerSecond, driveState.Speeds.vyMetersPerSecond); 
   
         LimelightHelpers.SetRobotOrientation(limelightName, headingDeg, 0, 0, 0, 0, 0);
         var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(limelightName);
@@ -638,9 +645,10 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         String mt_state = "null";
 
         if (llMeasurement != null && llMeasurement.tagCount > 0 && Math.abs(omegaRps) < 2 
-                && llMeasurement.avgTagDist < 3) 
+                && llMeasurement.avgTagDist < 4.5 && driveSpeed < 2) 
         {
-          if(llMeasurement.avgTagDist < AutoConstants.MT1_DIST)
+          if(llMeasurement.avgTagDist < AutoConstants.MT1_DIST && driveSpeed < 0.6
+                    && llMeasurement.rawFiducials[0].ta > AutoConstants.LL_Accuracy_mt1)
           {
           llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue(limelightName);
           mt_state = "mt1";
@@ -764,7 +772,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                                         .withTargetDirection(pose.getRotation().minus(new Rotation2d(Math.PI))));
 
         }).until(() -> {
-            return Math.abs(autoControllerX.getPositionError()) < errorLimit && Math.abs(autoControllerY.getPositionError()) < errorLimit;
+            return Math.abs(autoControllerX.getPositionError()) < errorLimit 
+                    && Math.abs(autoControllerY.getPositionError()) < errorLimit 
+                        && driveToPoint.HeadingController.getPositionError() < 3;
         }).finallyDo(() -> {autoControllerX.reset();autoControllerY.reset();});
     }
 

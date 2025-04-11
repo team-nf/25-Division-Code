@@ -35,6 +35,8 @@ public class GripperSubsystem extends SubsystemBase {
   private final DigitalInput m_AlgaeSensor = new DigitalInput(GripperConstants.kAlgaeSensor);
   private final DigitalInput m_coralSensor = new DigitalInput(GripperConstants.kCoralSensor);
 
+  private double autoCoralCounter = 0;
+
   /** 
    * Creates a new GripperSubsystem. 
    * Valla tuna ercan senden kopyaladım.
@@ -57,7 +59,7 @@ public class GripperSubsystem extends SubsystemBase {
   //public Command controlWithTriggers(double input) {return run(() -> );}
   
   //public Command takeAlgae() {return runEnd(() -> sparkPID.setReference(.6, ControlType.kMAXMotionVelocityControl), this::stop).until(this::hasAlgae);}
-  public Command takeAlgae() {return run(() -> the_hupletici.set(.5)).until(this::hasAlgae).finallyDo(() -> {if(hasAlgae()) the_hupletici.set(0.2); else stop();});}
+  public Command takeAlgae() {return run(() -> the_hupletici.set(.75)).until(this::hasAlgae).finallyDo(() -> {if(hasAlgae()) the_hupletici.set(0.2); else stop();});}
 
   //public Command takeCoral() {return runEnd(() -> sparkPID.setReference(-0.3, ControlType.kMAXMotionVelocityControl), this::stop).until(this::hasCoral);}
   public Command takeCoral() {return run(() -> the_hupletici.set(-0.43)).until(this::hasCoral).finallyDo(this::stop);}
@@ -68,7 +70,7 @@ public class GripperSubsystem extends SubsystemBase {
   //public Command throwCoral() {return runEnd(() -> sparkPID.setReference(0.5, ControlType.kMAXMotionVelocityControl), this::stop);}
   public Command throwCoral() {return runEnd(() -> the_hupletici.set(-0.6), this::stop).onlyWhile(this::hasCoral);}
   //public Command stop() {return run(() -> sparkPID.setReference(0.03 ControlType.kMAXMotionVelocityControl));}
-  public void stop() {the_hupletici.stopMotor();}
+  public void stop() {the_hupletici.stopMotor(); autoCoralCounter = 0;}
 
   public Command runGripper(double speed) {return run(() -> the_hupletici.set(speed)).finallyDo(this::stop);}
 
@@ -76,12 +78,21 @@ public class GripperSubsystem extends SubsystemBase {
 
   public Command TakeCoralAutoCommand()
   {
-    return run(() -> the_hupletici.set(-0.4)).until(this::hasCoral).finallyDo(this::stop);
+    return run(this::AutoCoral).until(this::hasCoral).finallyDo(this::stop);
   }
 
   public Command ThrowCoralAutoCommand()
   {
     return run(() -> the_hupletici.set(-0.6)).until(this::hasNotCoral).finallyDo(this::stop);
+  }
+
+  public void AutoCoral()
+  {
+    autoCoralCounter ++;
+    if(autoCoralCounter <= 70) the_hupletici.set(-0.3);
+    else if(autoCoralCounter <= 72) the_hupletici.stopMotor();
+    else autoCoralCounter = 0;
+
   }
   
   @Override

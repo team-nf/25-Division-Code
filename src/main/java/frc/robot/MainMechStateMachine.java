@@ -13,6 +13,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants.Elevator;
 import frc.robot.Constants.StatePositions;
 import frc.robot.sims.MainRobotMechanism;
 import frc.robot.subsystems.ArmSubsystem;
@@ -110,6 +111,9 @@ public class MainMechStateMachine {
             case "CoralStage4":
                 CoralStage4();
                 break;
+            case "CoralStage4Pre":
+                CoralStage4Pre();
+                break;
             case "ThrowAlgaeNet":
                 ThrowAlgaeNet();
                 break;
@@ -148,7 +152,8 @@ public class MainMechStateMachine {
 
     public void reachGoal(double height, double angleJ1, double angleJ2) {
         m_elevatorSubsystem.reachGoal(height);
-        m_armSubsystem.reachGoal(angleJ1, angleJ2);
+        if(lastState != "CoralStage4" || m_elevatorSubsystem.getElevatorHeight() > Elevator.minHeightForL4) 
+                m_armSubsystem.reachGoal(angleJ1, angleJ2);
         isGoalReached = m_armSubsystem.isGoalReached() && m_elevatorSubsystem.isGoalReached();
     }
 
@@ -170,6 +175,10 @@ public class MainMechStateMachine {
 
     public void CoralStage4() {
         reachGoal(StatePositions.CoralStage4[0], StatePositions.CoralStage4[1], StatePositions.CoralStage4[2]);
+    }
+
+    public void CoralStage4Pre() {
+        reachGoal(StatePositions.CoralStage4Pre[0], StatePositions.CoralStage4Pre[1], StatePositions.CoralStage4Pre[2]);
     }
 
     public void CoralCarry() {

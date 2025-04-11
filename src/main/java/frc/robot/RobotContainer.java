@@ -20,6 +20,7 @@ import frc.robot.commands.L1Cmd;
 import frc.robot.commands.L2Cmd;
 import frc.robot.commands.L3Cmd;
 import frc.robot.commands.L4Cmd;
+import frc.robot.commands.L4PreCmd;
 import frc.robot.custom.LedController;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ArmSubsystem;
@@ -87,7 +88,7 @@ public class RobotContainer {
                                                                                                                 // deadband5
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
-  private final double kAngle = 0.15;
+  private final double kAngle = 0.2;
   private final double kDrive = 0.8;
 
   private double selectedReef = -1;
@@ -254,27 +255,25 @@ public class RobotContainer {
 
     // m_driverController.button(4).onTrue(m_swerve.setPose(0.5,2.0,0));
 
-    m_driverController.leftBumper().and(() -> {
-      return checkIntake(1);
-    })
+    m_driverController.leftBumper().and(() -> {return checkIntake(1);})
         .whileTrue(NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToIntake(1))
-            .andThen(NamedCommands.getCommand("TakeCoralAuto")));
-    m_driverController.leftBumper().and(() -> {
-      return checkIntake(2);
-    })
-        .whileTrue(NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToIntake(2))
-            .andThen(NamedCommands.getCommand("TakeCoralAuto")));
-    m_driverController.leftBumper().and(() -> {
-      return checkIntake(12);
-    })
-        .whileTrue(NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToIntake(12))
-            .andThen(NamedCommands.getCommand("TakeCoralAuto")));
-    m_driverController.leftBumper().and(() -> {
-      return checkIntake(13);
-    })
-        .whileTrue(NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToIntake(13))
-            .andThen(NamedCommands.getCommand("TakeCoralAuto")));
+            .andThen(NamedCommands.getCommand("TakeCoralAuto")
+              .andThen(NamedCommands.getCommand("CoralCarry").onlyIf(m_gripperSubsystem::hasCoral))));
 
+    m_driverController.leftBumper().and(() -> {return checkIntake(2);})
+        .whileTrue(NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToIntake(2))
+          .andThen(NamedCommands.getCommand("TakeCoralAuto")
+            .andThen(NamedCommands.getCommand("CoralCarry").onlyIf(m_gripperSubsystem::hasCoral))));
+            
+    m_driverController.leftBumper().and(() -> {return checkIntake(12);})
+        .whileTrue(NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToIntake(12))
+          .andThen(NamedCommands.getCommand("TakeCoralAuto")
+            .andThen(NamedCommands.getCommand("CoralCarry").onlyIf(m_gripperSubsystem::hasCoral))));    
+            
+    m_driverController.leftBumper().and(() -> {return checkIntake(13);})
+        .whileTrue(NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToIntake(13))
+          .andThen(NamedCommands.getCommand("TakeCoralAuto")
+            .andThen(NamedCommands.getCommand("CoralCarry").onlyIf(m_gripperSubsystem::hasCoral))));
     // CORAL MODE -->
 
     m_driverController.a().and(() -> {
@@ -871,58 +870,6 @@ public class RobotContainer {
     SmartDashboard.putBoolean("IsAlgaeSelected", isAlgaeSelected);
   }
 
-  public Command getAutonomousCommandBlue() {
-    // An example command will be run in autonomous
-    return m_swerve.setPoseBlueAuto()
-        .andThen(NamedCommands.getCommand("CoralCarry").withDeadline(m_swerve.goToTagAuto(20)))
-        .andThen(new ParallelCommandGroup(m_swerve.goToReef(20, true, 4),
-            (NamedCommands.getCommand("CoralStage4").withTimeout(4.5))))
-        .andThen(NamedCommands.getCommand("ThrowCoralAuto"))
-        .andThen(
-            new ParallelCommandGroup(NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToIntakeAuto(13)),
-                NamedCommands.getCommand("TakeCoralAuto")))
-        .andThen(NamedCommands.getCommand("CoralCarry").withDeadline(m_swerve.goToTagAuto(19)))
-        .andThen(new ParallelCommandGroup(m_swerve.goToReef(19, false, 4),
-            (NamedCommands.getCommand("CoralStage4").withTimeout(4.5))))
-        .andThen(NamedCommands.getCommand("CoralStage4"))
-        .andThen(NamedCommands.getCommand("ThrowCoralAuto"))
-        .andThen(NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToTag(19)));
-  }
-
-  public Command getAutonomousCommandRed() {
-    // An example command will be run in autonomous
-    return m_swerve.setPoseRedAuto()
-        .andThen(NamedCommands.getCommand("CoralCarry").withDeadline(m_swerve.goToTagAuto(11)))
-        .andThen(new ParallelCommandGroup(m_swerve.goToReef(11, true, 4),
-            (NamedCommands.getCommand("CoralStage4").withTimeout(4.5))))
-        .andThen(NamedCommands.getCommand("ThrowCoralAuto"))
-        .andThen(
-            new ParallelCommandGroup(NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToIntakeAuto(1)),
-                NamedCommands.getCommand("TakeCoralAuto")))
-        .andThen(NamedCommands.getCommand("CoralCarry").withDeadline(m_swerve.goToTagAuto(6)))
-        .andThen(new ParallelCommandGroup(m_swerve.goToReef(6, false, 4),
-            (NamedCommands.getCommand("CoralStage4").withTimeout(4.5))))
-        .andThen(NamedCommands.getCommand("CoralStage4"))
-        .andThen(NamedCommands.getCommand("ThrowCoralAuto"))
-        .andThen(NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToTag(6)));
-  }
-
-  public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
-    Optional<Alliance> ally = DriverStation.getAlliance();
-    if (ally.isPresent()) {
-      if (ally.get() == Alliance.Blue) {
-        return getAutonomousCommandBlue();
-      } else
-        return getAutonomousCommandRed();
-    }
-    return null;
-  }
-
-  public Command getAutoTest() {
-    return null;
-  }
-
   public void setSelectorInfos() {
     isAlgaeSelected = m_isAlgaeMode.getSelected().booleanValue();
     isBlueSelected = m_isColorBlue.getSelected().booleanValue();
@@ -998,5 +945,68 @@ public class RobotContainer {
         .andThen(m_swerve.goToAlgaeWithPID(id).until(m_gripperSubsystem::hasAlgae)).andThen(m_swerve.getOut())
         .andThen(NamedCommands.getCommand("AlgaeCarry"));
   }
+
+  public Command autoIntake(int id)
+  {
+    return (NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToIntake(id)))
+                .andThen(NamedCommands.getCommand("TakeCoralAuto"));
+  }
+
+  public Command getAutonomousCommandBlue() {
+      // An example command will be run in autonomous
+      return m_swerve.setPoseBlueAuto()
+      .andThen(NamedCommands.getCommand("CoralCarry").withDeadline(m_swerve.goToTagAuto(20)))
+      .andThen(new ParallelCommandGroup(m_swerve.goToReef(20, true, 4),
+          (NamedCommands.getCommand("CoralStage4").withTimeout(4.5))))
+      .andThen(NamedCommands.getCommand("ThrowCoralAuto"))
+      .andThen(
+          new ParallelCommandGroup(NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToIntakeAuto(13)),
+              NamedCommands.getCommand("TakeCoralAuto")))
+      .andThen(NamedCommands.getCommand("CoralCarry").withDeadline(m_swerve.goToTagAuto(19)))
+      .andThen(new ParallelCommandGroup(m_swerve.goToReef(19, false, 4),
+          (NamedCommands.getCommand("CoralStage4").withTimeout(4.5))))
+      .andThen(NamedCommands.getCommand("CoralStage4"))
+      .andThen(NamedCommands.getCommand("ThrowCoralAuto"))
+      .andThen(NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToTag(19)));
+}
+
+public Command getAutonomousCommandRed() {
+  // An example command will be run in autonomous
+  return m_swerve.setPoseRedAuto()
+      .andThen(NamedCommands.getCommand("CoralCarry").withDeadline(m_swerve.goToTagAuto(11)))
+      .andThen(new ParallelCommandGroup(m_swerve.goToReef(11, true, 4),
+          (NamedCommands.getCommand("CoralStage4").withTimeout(4.5))))
+      .andThen(NamedCommands.getCommand("ThrowCoralAuto"))
+      .andThen(
+          new ParallelCommandGroup(NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToIntakeAuto(1)),
+              NamedCommands.getCommand("TakeCoralAuto")))
+      .andThen(NamedCommands.getCommand("CoralCarry").withDeadline(m_swerve.goToTagAuto(6)))
+      .andThen(new ParallelCommandGroup(m_swerve.goToReef(6, false, 4),
+          (NamedCommands.getCommand("CoralStage4").withTimeout(4.5))))
+      .andThen(NamedCommands.getCommand("CoralStage4"))
+      .andThen(NamedCommands.getCommand("ThrowCoralAuto"))
+      .andThen(NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToTag(6)));
+}
+
+public Command getAutonomousCommand() {
+  // An example command will be run in autonomous
+  Optional<Alliance> ally = DriverStation.getAlliance();
+  if (ally.isPresent()) {
+    if (ally.get() == Alliance.Blue) {
+      return getAutonomousCommandBlue();
+    } else
+      return getAutonomousCommandRed();
+  }
+  return null;
+}
+
+public Command getAutoTest() {
+  return autoReefPoseS4R(11).andThen(NamedCommands.getCommand("ThrowCoralAuto"))
+         .andThen(autoIntake(1))
+         .andThen(autoReefPoseS4L(6).andThen(NamedCommands.getCommand("ThrowCoralAuto")))
+         .andThen(autoIntake(1))
+         .andThen(autoReefPoseS4R(6).andThen(NamedCommands.getCommand("ThrowCoralAuto")))
+         .andThen(autoIntake(1));
+}
 
 }
