@@ -57,6 +57,10 @@ public class AlgaeTrackCmd extends Command {
   private static final double MAX_ASPECT_RATIO = 1.3;
   private static final double MIN_AREA_RATIO = 0.65;
   private static final double EDGE_MARGIN = 5.0;
+  
+  // Height threshold - Only select objects in the bottom 60% of screen
+  private static final double HEIGHT_THRESHOLD_PERCENT = 0.6; // 60% from bottom of screen
+  private static final double TY_THRESHOLD = TY_MIN + ((TY_MAX - TY_MIN) * (1 - HEIGHT_THRESHOLD_PERCENT));
 
   // PID controllers
   private final PIDController rotationPID;
@@ -114,6 +118,7 @@ public class AlgaeTrackCmd extends Command {
     SmartDashboard.putNumber("Algae_Selected_Area", 0);
     SmartDashboard.putNumber("Algae_BB_w", 0);
     SmartDashboard.putNumber("Algae_BB_h", 0);
+    SmartDashboard.putNumber("Algae_TY_Threshold", TY_THRESHOLD);
 
     // Set limelight pipeline for neural detection and reset tracking
     LimelightHelpers.setPipelineIndex(limelightName, 0);
@@ -149,8 +154,8 @@ public class AlgaeTrackCmd extends Command {
       // Drive robot using calculated velocities
       m_swerve.setControl(
         roboDrive
-          .withVelocityX(-forwardVelocity) // Forward velocity
-          // .withVelocityX(0.0) // Forward velocity
+          // .withVelocityX(-forwardVelocity) // Forward velocity
+          .withVelocityX(0.0) // Forward velocity
           .withVelocityY(0.0)               // No side-to-side motion
           .withRotationalRate(rotationVelocity) // Rotation velocity
       );
@@ -210,6 +215,7 @@ public class AlgaeTrackCmd extends Command {
     SmartDashboard.putBoolean("Algae_EnableAreaCheck", enableAreaRatioCheck);
     SmartDashboard.putNumber("Algae_TargetOffsetX", targetOffsetX);
     SmartDashboard.putNumber("Algae_TargetOffsetY", targetOffsetY);
+    SmartDashboard.putNumber("Algae_TY_Threshold", TY_THRESHOLD);
   }
   
   private double[] calculateTargetPoint(RawDetection detection) {
@@ -385,6 +391,11 @@ public class AlgaeTrackCmd extends Command {
     double highestTY = -Double.MAX_VALUE;
     
     for (RawDetection detection : detections) {
+      // Skip if the detection is too high on the screen (top 30%)
+      if (detection.tync < TY_THRESHOLD) {
+        continue;
+      }
+      
       if (!isBoxSquarish(detection) || !hasValidAreaRatio(detection)) {
         continue;
       }
@@ -402,6 +413,11 @@ public class AlgaeTrackCmd extends Command {
     double closestDistance = Double.MAX_VALUE;
     
     for (RawDetection detection : detections) {
+      // Skip if the detection is too high on the screen (top 30%)
+      if (detection.tync < TY_THRESHOLD) {
+        continue;
+      }
+      
       if (!isBoxSquarish(detection) || !hasValidAreaRatio(detection)) {
         continue;
       }
@@ -424,6 +440,11 @@ public class AlgaeTrackCmd extends Command {
     double largestArea = -Double.MAX_VALUE;
     
     for (RawDetection detection : detections) {
+      // Skip if the detection is too high on the screen (top 30%)
+      if (detection.tync < TY_THRESHOLD) {
+        continue;
+      }
+      
       if (!isBoxSquarish(detection) || !hasValidAreaRatio(detection)) {
         continue;
       }
