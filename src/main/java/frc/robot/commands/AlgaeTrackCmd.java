@@ -10,6 +10,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.LimelightHelpers;
@@ -46,17 +47,24 @@ public class AlgaeTrackCmd extends Command {
   private static final double TY_MIN = -24.85;
   private static final double TY_MAX = 24.85;
 
-  private static final double kForwardP = 3.0;
+  private static final double kForwardP = 5.0;
   private static final double kForwardD = 0.0;
   private static final double kForwardI = 0.0;
 
-  private static final double kRotationP = 1.9;
+  private static final double kRotationP = 1.5;
   private static final double kRotationD = 0.0;
   private static final double kRotationI = 0.0;
 
   private static final double MAX_ASPECT_RATIO = 1.3;
   private static final double MIN_AREA_RATIO = 0.65;
   private static final double EDGE_MARGIN = 5.0;
+  
+  // Slew rate limiters (units per second)
+  private static final double FORWARD_RATE_LIMIT = 2.0;  // Meters per second per second
+  private static final double ROTATION_RATE_LIMIT = 6.0; // Radians per second per second
+  private final SlewRateLimiter forwardLimiter;
+  private final SlewRateLimiter rotationLimiter;
+
   
   // Height threshold - Only select objects in the bottom 60% of screen
   private static final double HEIGHT_THRESHOLD_PERCENT = 0.6; // 60% from bottom of screen
@@ -79,6 +87,10 @@ public class AlgaeTrackCmd extends Command {
     // Create PID controllers
     rotationPID = new PIDController(kRotationP, kRotationI, kRotationD);
     forwardPID = new PIDController(kForwardP, kForwardI, kForwardD);
+    
+    // Create slew rate limiters
+    forwardLimiter = new SlewRateLimiter(FORWARD_RATE_LIMIT);
+    rotationLimiter = new SlewRateLimiter(ROTATION_RATE_LIMIT);
     
     // Set input range for rotation PID (helps with wrap-around)
     rotationPID.enableContinuousInput(-1.0, 1.0);
@@ -118,15 +130,20 @@ public class AlgaeTrackCmd extends Command {
     SmartDashboard.putNumber("Algae_Selected_Area", 0);
     SmartDashboard.putNumber("Algae_BB_w", 0);
     SmartDashboard.putNumber("Algae_BB_h", 0);
+    SmartDashboard.putNumber("Algae_SmoothForwardVelocity", 0);
+    SmartDashboard.putNumber("Algae_SmoothRotationVelocity", 0);
     SmartDashboard.putNumber("Algae_TY_Threshold", TY_THRESHOLD);
 
     // Set limelight pipeline for neural detection and reset tracking
     LimelightHelpers.setPipelineIndex(limelightName, 0);
     selectedAlgae = null;
     
-    // Reset PID controllers
+    // Reset PID controllers and slew rate limiters
     rotationPID.reset();
     forwardPID.reset();
+    // Reset slew rate limiters to 0
+    forwardLimiter.reset(0);
+    rotationLimiter.reset(0);
   }
 
   @Override
@@ -135,30 +152,53 @@ public class AlgaeTrackCmd extends Command {
     processLimelightDetections();
     
     if (selectedAlgae != null) {
-      // Calculate drive values
+      // Calculate target point
       double[] targetPoint = calculateTargetPoint(selectedAlgae);
       
-      // Use PID controllers
+      // Calculate angle to target using the target point
+      // double angleToTarget = calculateAngleToTarget(targetPoint);
+      
+      // Calculate Y error for forward movement
       double mappedTX = map(targetPoint[0], TX_MIN, TX_MAX, -1.0, 1.0);
       double mappedTY = map(-targetPoint[1], TY_MIN, TY_MAX, 0.0, 1.0);
       
-      double rotationVelocity = rotationPID.calculate(mappedTX, 0); // Target is center (0)
+      // Use PID controllers
+      // double rotationVelocity = rotationPID.calculate(angleToTarget, 0); // Target is center (0 angle)
+      double rotationVelocity = rotationPID.calculate(mappedTX, 0); // Target is center (0 angle)
       double forwardVelocity = forwardPID.calculate(mappedTY, 0);   // Target is 0 (minimum distance)
       
+      // Apply slew rate limiters for smoother motion
+      double smoothForwardVelocity = forwardLimiter.calculate(forwardVelocity);
+      double smoothRotationVelocity = rotationLimiter.calculate(rotationVelocity);
+      
       // Log control values
+      SmartDashboard.putNumber("Algae_AngleToTarget", angleToTarget);
       SmartDashboard.putNumber("Algae_ForwardVelocity", forwardVelocity);
       SmartDashboard.putNumber("Algae_RotationVelocity", rotationVelocity);
-      SmartDashboard.putNumber("Algae_MappedTX", mappedTX);
-      SmartDashboard.putNumber("Algae_MappedTY", mappedTY);
+      SmartDashboard.putNumber("Algae_SmoothForwardVelocity", smoothForwardVelocity);
+      SmartDashboard.putNumber("Algae_SmoothRotationVelocity", smoothRotationVelocity);
       
-      // Drive robot using calculated velocities
+      // Drive robot using calculated velocities with rate limiting applied
       m_swerve.setControl(
         roboDrive
-          // .withVelocityX(-forwardVelocity) // Forward velocity
+          // .withVelocityX(-smoothForwardVelocity) // Forward velocity
           .withVelocityX(0.0) // Forward velocity
-          .withVelocityY(0.0)               // No side-to-side motion
-          .withRotationalRate(rotationVelocity) // Rotation velocity
+          .withVelocityY(0.0)                    // No side-to-side motion
+          .withRotationalRate(-smoothRotationVelocity) // Rotation velocity
       );
+    } else {
+      // If no target, smoothly stop the robot
+      double smoothForwardVelocity = forwardLimiter.calculate(0);
+      double smoothRotationVelocity = rotationLimiter.calculate(0);
+      
+      if (Math.abs(smoothForwardVelocity) > 0.01 || Math.abs(smoothRotationVelocity) > 0.01) {
+        m_swerve.setControl(
+          roboDrive
+            .withVelocityX(-smoothForwardVelocity)
+            .withVelocityY(0.0)
+            .withRotationalRate(smoothRotationVelocity)
+        );
+      }
     }
   }
 
@@ -517,4 +557,69 @@ public class AlgaeTrackCmd extends Command {
     
     return false;
   }
+
+  /**
+   * Calculates the angle to the target using a simple right triangle approach.
+   * Forms a right triangle with vertices at:
+   * 1. The target point (x, y)
+   * 2. A virtual point below the screen's bottom center
+   * 3. A point directly below the target at the same height as the virtual point
+   * 
+   * @param targetPoint The target point [x, y] in screen space
+   * @return The angle to the target in degrees (-1 to 1 range, suitable for PID)
+   */
+  // private double calculateAngleToTarget(double[] targetPoint) {
+  //   // Target coordinates
+  //   double targetX = targetPoint[0];
+  //   double targetY = targetPoint[1];
+    
+  //   // Create a virtual reference point below the screen
+  //   // This gives more stable angles and prevents extreme values
+  //   double bottomCenterX = 0; // Center X is 0 in angular coordinates
+    
+  //   // Instead of using the screen bottom (TY_MIN),
+  //   // use a point further down by half the screen height
+  //   double screenHeight = TY_MAX - TY_MIN;
+  //   double virtualBottomY = TY_MIN - (screenHeight / 2.0);
+    
+  //   // Calculate the horizontal and vertical differences
+  //   double deltaX = targetX - bottomCenterX;
+  //   double deltaY = virtualBottomY - targetY; // Using the virtual point below the screen
+    
+  //   // Safety check for division by zero or very small values
+  //   if (Math.abs(deltaY) < 0.001) {
+  //     // Avoid division by zero by setting a minimum value
+  //     deltaY = (deltaY >= 0) ? 0.001 : -0.001;
+  //   }
+    
+  //   double angleRadians = 0;
+  //   double angleDegrees = 0;
+    
+  //   try {
+  //     // Calculate the angle using arctangent
+  //     angleRadians = Math.atan2(deltaX, deltaY);
+  //     angleDegrees = Math.toDegrees(angleRadians);
+  //   } catch (Exception e) {
+  //     // If any error occurs, default to a safe value
+  //     System.out.println("Error in angle calculation: " + e.getMessage());
+  //     angleDegrees = (deltaX > 0) ? 45.0 : -45.0; // Default to 45 degrees in the direction of deltaX
+  //   }
+    
+  //   // Check for NaN or Infinity
+  //   if (Double.isNaN(angleDegrees) || Double.isInfinite(angleDegrees)) {
+  //     angleDegrees = (deltaX > 0) ? 45.0 : -45.0; // Default to 45 degrees in the direction of deltaX
+  //   }
+    
+  //   // Normalize to [-1, 1] for PID controller
+  //   double normalizedAngle = angleDegrees / 90.0;
+  //   normalizedAngle = Math.max(-1.0, Math.min(1.0, normalizedAngle));
+    
+  //   // Log for debugging
+  //   SmartDashboard.putNumber("Algae_DeltaX", deltaX);
+  //   SmartDashboard.putNumber("Algae_DeltaY", deltaY);
+  //   SmartDashboard.putNumber("Algae_AngleDegrees", angleDegrees);
+  //   SmartDashboard.putNumber("Algae_VirtualBottomY", virtualBottomY);
+    
+  //   return normalizedAngle;
+  // }
 } 
