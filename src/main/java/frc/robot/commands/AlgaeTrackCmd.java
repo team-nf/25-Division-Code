@@ -172,7 +172,7 @@ public class AlgaeTrackCmd extends Command {
       double smoothRotationVelocity = rotationLimiter.calculate(rotationVelocity);
       
       // Log control values
-      SmartDashboard.putNumber("Algae_AngleToTarget", angleToTarget);
+      // SmartDashboard.putNumber("Algae_AngleToTarget", angleToTarget);
       SmartDashboard.putNumber("Algae_ForwardVelocity", forwardVelocity);
       SmartDashboard.putNumber("Algae_RotationVelocity", rotationVelocity);
       SmartDashboard.putNumber("Algae_SmoothForwardVelocity", smoothForwardVelocity);
@@ -181,8 +181,8 @@ public class AlgaeTrackCmd extends Command {
       // Drive robot using calculated velocities with rate limiting applied
       m_swerve.setControl(
         roboDrive
-          // .withVelocityX(-smoothForwardVelocity) // Forward velocity
-          .withVelocityX(0.0) // Forward velocity
+          .withVelocityX(-smoothForwardVelocity) // Forward velocity
+          // .withVelocityX(0.0) // Forward velocity
           .withVelocityY(0.0)                    // No side-to-side motion
           .withRotationalRate(-smoothRotationVelocity) // Rotation velocity
       );
