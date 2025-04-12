@@ -95,7 +95,7 @@ public class AlgaeTrackCmd extends Command {
     // Set input range for rotation PID (helps with wrap-around)
     rotationPID.enableContinuousInput(-1.0, 1.0);
     
-    double maxSpeed = MetersPerSecond.of(2).in(MetersPerSecond);
+    double maxSpeed = MetersPerSecond.of(1.5).in(MetersPerSecond);
     roboDrive = new SwerveRequest.RobotCentric()
       .withDeadband(maxSpeed * 0.035)
       .withDriveRequestType(DriveRequestType.Velocity);
@@ -184,7 +184,7 @@ public class AlgaeTrackCmd extends Command {
           .withVelocityX(-smoothForwardVelocity) // Forward velocity
           // .withVelocityX(0.0) // Forward velocity
           .withVelocityY(0.0)                    // No side-to-side motion
-          .withRotationalRate(-smoothRotationVelocity) // Rotation velocity
+          .withRotationalRate(smoothRotationVelocity) // Rotation velocity
       );
     } else {
       // If no target, smoothly stop the robot
