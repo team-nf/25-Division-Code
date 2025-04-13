@@ -244,7 +244,7 @@ public final class Constants {
     public static final double[] AlgaeStage34 = {0.8, 120, 233};     //Algae Stage 3-4
     public static final double[] AlgaeStage34FromL4 = {0.8, 120, 233};     //Algae Stage 3-4
 
-    public static final double[] AlgaeGround = {0.28, 45, 257.5};  //Algae Ground
+    public static final double[] AlgaeGround = {0.25, 45, 257.5};  //Algae Ground
     public static final double[] AlgaeFromCoral = {0.25, 180, 180};  //Algae Ground
     public static final double[] AlgaeCarry = {0.25, 160, 210};  //Algae Ground
 

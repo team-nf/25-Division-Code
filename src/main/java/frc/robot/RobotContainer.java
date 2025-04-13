@@ -21,7 +21,6 @@ import frc.robot.commands.L2Cmd;
 import frc.robot.commands.L3Cmd;
 import frc.robot.commands.L4Cmd;
 import frc.robot.commands.L4PreCmd;
-import frc.robot.commands.CoralTrackCmd;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -129,9 +128,6 @@ public class RobotContainer {
     NamedCommands.registerCommand("AlgaeProcessor", new AlgaeProCmd(m_mainMech));
     NamedCommands.registerCommand("AlgaeGround",    new AlgaeGroundCmd(m_mainMech));
     NamedCommands.registerCommand("AlgaeTrack",     new AlgaeTrackCmd(m_swerve));
-    NamedCommands.registerCommand("CoralTrack",     new CoralTrackCmd(m_swerve, m_gripperSubsystem));
-
-
 
     NamedCommands.registerCommand("TakeCoralAuto", m_gripperSubsystem.TakeCoralAutoCommand());
     NamedCommands.registerCommand("ThrowCoralAuto", m_gripperSubsystem.ThrowCoralAutoCommand());
@@ -223,6 +219,8 @@ public class RobotContainer {
     m_operatorController.circle().whileTrue(NamedCommands.getCommand("CoralStage2"));
     m_operatorController.square().whileTrue(NamedCommands.getCommand("CoralStage3"));
     m_operatorController.triangle().whileTrue(NamedCommands.getCommand("CoralStage4"));
+
+    // m_operatorController.triangle().whileTrue(NamedCommands.getCommand("AlgaeTrack"));
 
     m_operatorController.L1().whileTrue(m_armSubsystem.turnJ1(0.2));
     m_operatorController.R1().whileTrue(m_armSubsystem.turnJ1(-0.2));
