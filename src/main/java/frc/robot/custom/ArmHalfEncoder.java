@@ -39,7 +39,7 @@ public class ArmHalfEncoder {
 
     public void calcAngle()
     {
-        if(Math.abs(lastRawAngle - getRawEncoder()) > 340) firstHalf = !firstHalf;
+        if(Math.abs(lastRawAngle - getRawEncoder()) > 300) firstHalf = !firstHalf;
         lastRawAngle = getRawEncoder();
         jointAngleHolder = (getRawEncoder()/2 + (firstHalf ? 0 : 180)) - startAngle;
         if (jointAngleHolder < 0) jointAngleHolder += 360;

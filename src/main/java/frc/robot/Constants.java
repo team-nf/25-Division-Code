@@ -33,7 +33,7 @@ public final class Constants {
   }
 
   public class InitialConstants {
-    public static final double[] EncoderStartAngles = {203.5/2,191.7/2};
+    public static final double[] EncoderStartAngles = {205.5/2,207.7/2};
     // **** Second joint should be equal to 355 at zeroing position
   }
 
@@ -226,10 +226,10 @@ public final class Constants {
 
     public static final double[] CoralIntake = {0.03, 211, 105};    //Coral Intake 217.5 110
 
-    public static final double[] CoralStage1 = {0.05, 150, 160};      //Coral Stage 1
-    public static final double[] CoralStage2 = {0.22, 150, 160};   //Coral Stage 2
-    public static final double[] CoralStage3 = {0.63, 150, 160};    //Coral Stage 3
-    public static final double[] CoralStage4 = {1.45, 152, 135};    //Coral Stage 4
+    public static final double[] CoralStage1 = {0.05, 150, 170};      //Coral Stage 1
+    public static final double[] CoralStage2 = {0.2, 150, 170};   //Coral Stage 2
+    public static final double[] CoralStage3 = {0.61, 150, 170};    //Coral Stage 3
+    public static final double[] CoralStage4 = {1.43, 152, 140};    //Coral Stage 4
 
     public static final double[] CoralStage4Pre = {1.45, 160, 152};    //Coral Stage 4
     public static final double[] CoralCarry = {0.025, 180, 160};    //Coral Carry
@@ -256,10 +256,10 @@ public final class Constants {
 
   public class AutoConstants
   {
-    public static final double[] stage4Pos18R   = {3.15,3.94,0};
-    public static final double[] stage3Pos18R   = {3.15,3.94,0};
-    public static final double[] stage4Pos18L   = {3.15,4.29,0};
-    public static final double[] stage3Pos18L   = {3.15,4.29,0};
+    public static final double[] stage4Pos18R   = {3.14,3.94,0};
+    public static final double[] stage3Pos18R   = {3.14,3.94,0};
+    public static final double[] stage4Pos18L   = {3.14,4.29,0};
+    public static final double[] stage3Pos18L   = {3.14,4.29,0};
     public static final double[] algae3Pos      = {2.9,4.1,0};
     public static final double[] algae2Pos      = {2.9,4.15,0};
     public static final double[] takeAlgaePos   = {3.15,4.15,0};

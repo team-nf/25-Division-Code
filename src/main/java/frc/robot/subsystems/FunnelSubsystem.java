@@ -37,6 +37,6 @@ public class FunnelSubsystem extends SubsystemBase {
 
   public boolean isReady()
   {
-    return leftValue() && rightValue();
+    return leftValue() || rightValue();
   }
 }

@@ -77,6 +77,7 @@ public class RobotContainer {
   private final SendableChooser<Boolean> m_isColorBlue = new SendableChooser<>();
   private final SendableChooser<Boolean> m_isAlgaeMode = new SendableChooser<>();
   private final SendableChooser<Boolean> m_isL34       = new SendableChooser<>();
+  private final SendableChooser<Boolean> m_isAutoThrow = new SendableChooser<>();
   private final SendableChooser<Integer> m_checkIntake = new SendableChooser<>();
 
   public final CommandSwerveDrivetrain m_swerve = TunerConstants.createDrivetrain();
@@ -101,6 +102,7 @@ public class RobotContainer {
   private boolean isAlgaeSelected = false;
   private boolean isL34Selected = true;
   private double selectedReefID = -1;
+  private boolean reefAutoThrow = true;
 
   private SlewRateLimiter d1Filter = new SlewRateLimiter(2.8);
   private SlewRateLimiter d2Filter = new SlewRateLimiter(2.8);
@@ -160,6 +162,9 @@ public class RobotContainer {
     m_reefChooser.addOption("5", 5);
     m_reefChooser.addOption("6", 6);
 
+    m_isAutoThrow.setDefaultOption("Yes", true);
+    m_isAutoThrow.addOption("No", false);
+
     Optional<Alliance> ally = DriverStation.getAlliance();
     if (ally.isPresent()) {
       if (ally.get() == Alliance.Red) {
@@ -189,6 +194,7 @@ public class RobotContainer {
     m_checkIntake.setDefaultOption("13", 13);
 
     SmartDashboard.putData("ReefN", m_reefChooser);
+    SmartDashboard.putData("AutoThrow??", m_isAutoThrow);
     SmartDashboard.putData("ColorSelect", m_isColorBlue);
     SmartDashboard.putData("AlgaeMode", m_isAlgaeMode);
     SmartDashboard.putData("StageMode", m_isL34);
@@ -794,6 +800,7 @@ public class RobotContainer {
       if (selectedReefID <= 5)
         selectedReefID += 6;
     }
+    reefAutoThrow = m_isAutoThrow.getSelected().booleanValue();
   }
 
   public boolean checkIntake(int n) {
@@ -808,42 +815,57 @@ public class RobotContainer {
 
   public Command autoReefPoseS4L(int id) {
     return m_swerve.goToTagL(id).andThen(NamedCommands.getCommand("CoralStage4")
-        .withDeadline(m_swerve.goToReefWithPID(id, true, 4)));
+        .withDeadline(m_swerve.goToReefWithPID(id, true, 4)))
+          .andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(this::isAutoThrow));
   }
 
   public Command autoReefPoseS4R(int id) {
     return m_swerve.goToTagR(id).andThen(NamedCommands.getCommand("CoralStage4")
-        .withDeadline(m_swerve.goToReefWithPID(id, false, 4)));
+        .withDeadline(m_swerve.goToReefWithPID(id, false, 4)))
+        .andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(this::isAutoThrow));
+
   }
 
   public Command autoReefPoseS3L(int id) {
     return m_swerve.goToTagL(id).andThen(NamedCommands.getCommand("CoralStage3")
-        .withDeadline(m_swerve.goToReefWithPID(id, true, 3)));
+        .withDeadline(m_swerve.goToReefWithPID(id, true, 3)))
+        .andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(this::isAutoThrow));
+
   }
 
   public Command autoReefPoseS3R(int id) {
     return m_swerve.goToTagR(id).andThen(NamedCommands.getCommand("CoralStage3")
-        .withDeadline(m_swerve.goToReefWithPID(id, false, 3)));
+        .withDeadline(m_swerve.goToReefWithPID(id, false, 3)))
+        .andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(this::isAutoThrow));
+
   }
 
   public Command autoReefPoseS2L(int id) {
     return m_swerve.goToTagL(id).andThen(NamedCommands.getCommand("CoralStage2")
-        .withDeadline(m_swerve.goToReefWithPID(id, true, 3)));
+        .withDeadline(m_swerve.goToReefWithPID(id, true, 3)))
+        .andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(this::isAutoThrow));
+
   }
 
   public Command autoReefPoseS2R(int id) {
     return m_swerve.goToTagR(id).andThen(NamedCommands.getCommand("CoralStage2")
-        .withDeadline(m_swerve.goToReefWithPID(id, false, 3)));
+        .withDeadline(m_swerve.goToReefWithPID(id, false, 3)))
+        .andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(this::isAutoThrow));
+
   }
 
   public Command autoReefPoseS1L(int id) {
     return m_swerve.goToTagL(id).andThen(NamedCommands.getCommand("CoralStage1")
-        .withDeadline(m_swerve.goToReefWithPID(id, true, 3)));
+        .withDeadline(m_swerve.goToReefWithPID(id, true, 3)))
+        .andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(this::isAutoThrow));
+
   }
 
   public Command autoReefPoseS1R(int id) {
     return m_swerve.goToTagR(id).andThen(NamedCommands.getCommand("CoralStage1")
-        .withDeadline(m_swerve.goToReefWithPID(id, false, 3)));
+        .withDeadline(m_swerve.goToReefWithPID(id, false, 3)))
+        .andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(this::isAutoThrow));
+
   }
 
   public Command autoReefA23(int id) {
@@ -919,16 +941,21 @@ public Command getAutonomousCommand() {
 }
 
 public Command getAutoTest() {
-  return autoReefPoseS4R(11).andThen(NamedCommands.getCommand("ThrowCoralAuto"))
+  return autoReefPoseS4R(11)
          .andThen(autoIntakeForAuto(1))
-         .andThen(autoReefPoseS4L(6).andThen(NamedCommands.getCommand("ThrowCoralAuto")))
+         .andThen(autoReefPoseS4L(6))
          .andThen(autoIntakeForAuto(1))
-         .andThen(autoReefPoseS4R(6).andThen(NamedCommands.getCommand("ThrowCoralAuto")))
+         .andThen(autoReefPoseS4R(6))
          .andThen(autoIntake(1));
 }
 
 public Command eleReadyCmd()
 {
-  return m_elevatorSubsystem.reachGoalCommand(0.05);
+  return m_elevatorSubsystem.beReady();
+}
+
+public boolean isAutoThrow()
+{
+  return reefAutoThrow || DriverStation.isAutonomous();
 }
 }

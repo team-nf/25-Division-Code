@@ -81,6 +81,9 @@ public class MainMechStateMachine {
 
         if (lastState == "AlgaeGround" && state != "AlgaeGround") state = "AlgaeGroundToCarry";
 
+        if (lastState == "CoralStage4" && state != "CoralStage4") state = "Stage4ToClosed";
+        
+
         if (m_gripperSubsystem.hasAlgae()) {
             if (!algaeStateList.contains(state)) {
                 state = lastState;
@@ -112,6 +115,9 @@ public class MainMechStateMachine {
                 break;
             case "CoralStage4":
                 CoralStage4();
+                break;
+            case "Stage4ToClosed":
+                Stage4ToClosed();
                 break;
             case "CoralStage4Pre":
                 CoralStage4Pre();
@@ -181,6 +187,10 @@ public class MainMechStateMachine {
 
     public void CoralStage4Pre() {
         reachGoal(StatePositions.CoralStage4Pre[0], StatePositions.CoralStage4Pre[1], StatePositions.CoralStage4Pre[2]);
+    }
+
+    public void Stage4ToClosed() {
+        reachGoal(StatePositions.CoralStage4[0], StatePositions.Closed[1], StatePositions.Closed[2]);
     }
 
     public void CoralCarry() {

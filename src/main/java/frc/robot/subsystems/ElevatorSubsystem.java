@@ -172,5 +172,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     return runOnce(() -> m_motor.setPosition(0));
   }
 
+  public Command beReady()
+  {
+    return run(() -> {if(elevatorHeight < 0.05) reachGoal(0.05);});
+  }
+
 
 }
