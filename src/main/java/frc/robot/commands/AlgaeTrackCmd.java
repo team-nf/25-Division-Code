@@ -31,15 +31,15 @@ public class AlgaeTrackCmd extends Command {
   private final String limelightName = "limelight-obj";
   
   // Algorithm selection and filtering flags
-  private static SelectionAlgorithm currentAlgorithm = SelectionAlgorithm.LOWEST_FIRST;
+  private static SelectionAlgorithm CURRENT_SELECTION_ALGORITHM = SelectionAlgorithm.LOWEST_FIRST;
   private boolean enableRectangularCheck = true;
   private boolean enableAreaRatioCheck = true;
   
   // Target point in bounding box using Cartesian coordinates (-1 to 1, -1 to 1)
   // where (0,0) is center, (-1,0) is left center, (1,0) is right center
   // (0,1) is top center, (0,-1) is bottom center
-  private static double targetOffsetX = -0.8;  // Default: 80% toward left edge from center
-  private static double targetOffsetY = 0.0;   // Default: vertical center
+  private static double TARGET_OFFSET_X = -0.8;  // Default: 80% toward left edge from center
+  private static double TARGET_OFFSET_Y = 0.0;   // Default: vertical center
   
   // Constants
   private static final double TX_MIN = -29.8;
@@ -69,6 +69,10 @@ public class AlgaeTrackCmd extends Command {
   // Height threshold - Only select objects in the bottom 60% of screen
   private static final double HEIGHT_THRESHOLD_PERCENT = 0.6; // 60% from bottom of screen
   private static final double TY_THRESHOLD = TY_MIN + ((TY_MAX - TY_MIN) * (1 - HEIGHT_THRESHOLD_PERCENT));
+  
+  // Virtual screen points for angle calculation
+  private static final double VIRTUAL_BOTTOM_X = 0.0; // Default center X is 0 in angular coordinates
+  private static final double VIRTUAL_BOTTOM_Y = -50.0; // Default point below the screen
 
   // PID controllers
   private final PIDController rotationPID;
@@ -111,11 +115,11 @@ public class AlgaeTrackCmd extends Command {
     SmartDashboard.putNumber("LL_TA", 0);
     SmartDashboard.putString("LL_DetectorClass", "");
     SmartDashboard.putNumber("LL_DetectorClassIndex", 0);
-    SmartDashboard.putString("Algae_Algorithm", currentAlgorithm.toString());
+    SmartDashboard.putString("Algae_Algorithm", CURRENT_SELECTION_ALGORITHM.toString());
     SmartDashboard.putBoolean("Algae_EnableRectCheck", enableRectangularCheck);
     SmartDashboard.putBoolean("Algae_EnableAreaCheck", enableAreaRatioCheck);
-    SmartDashboard.putNumber("Algae_TargetOffsetX", targetOffsetX);
-    SmartDashboard.putNumber("Algae_TargetOffsetY", targetOffsetY);
+    SmartDashboard.putNumber("Algae_TargetOffsetX", TARGET_OFFSET_X);
+    SmartDashboard.putNumber("Algae_TargetOffsetY", TARGET_OFFSET_Y);
     SmartDashboard.putNumber("Algae_AreaRatio", 0);
     SmartDashboard.putNumber("Algae_LeftX", 0);
     SmartDashboard.putNumber("Algae_TargetX", 0);
@@ -134,6 +138,13 @@ public class AlgaeTrackCmd extends Command {
     SmartDashboard.putNumber("Algae_SmoothRotationVelocity", 0);
     SmartDashboard.putNumber("Algae_AngleToTarget", 0);
     SmartDashboard.putNumber("Algae_TY_Threshold", TY_THRESHOLD);
+    SmartDashboard.putNumber("Algae_DeltaX", 0);
+    SmartDashboard.putNumber("Algae_DeltaY", 0);
+    SmartDashboard.putNumber("Algae_AngleDegrees", 0);
+    
+    // Virtual screen points - display only
+    SmartDashboard.putNumber("Algae_VirtualBottomX", VIRTUAL_BOTTOM_X);
+    SmartDashboard.putNumber("Algae_VirtualBottomY", VIRTUAL_BOTTOM_Y);
 
     // Set limelight pipeline for neural detection and reset tracking
     LimelightHelpers.setPipelineIndex(limelightName, 0);
@@ -164,7 +175,7 @@ public class AlgaeTrackCmd extends Command {
       // double mappedTY = map(-targetPoint[1], TY_MIN, TY_MAX, 0.0, 1.0);
       
       // Use PID controllers
-      double forwardVelocity = forwardPID.calculate(mappedTY, 0);   // Target is 0 (minimum distance)
+      double forwardVelocity = forwardPID.calculate(mappedTX, 0);   // Target is 0 (minimum distance)
       double rotationVelocity = rotationPID.calculate(angleToTarget, 0); // Target is center (0 angle)
       // double rotationVelocity = rotationPID.calculate(mappedTX, 0); // Target is center (0 angle)
       
@@ -219,7 +230,7 @@ public class AlgaeTrackCmd extends Command {
         SmartDashboard.putNumber("LL_DetectionCount", detections.length);
         
         // Select algae based on algorithm
-        switch (currentAlgorithm) {
+        switch (CURRENT_SELECTION_ALGORITHM) {
           case LOWEST_FIRST:
             selectLowestAlgae(detections);
             break;
@@ -254,12 +265,16 @@ public class AlgaeTrackCmd extends Command {
     SmartDashboard.putNumber("LL_DetectorClassIndex", LimelightHelpers.getDetectorClassIndex(limelightName));
     
     // Display algorithm and filter settings
-    SmartDashboard.putString("Algae_Algorithm", currentAlgorithm.toString());
+    SmartDashboard.putString("Algae_Algorithm", CURRENT_SELECTION_ALGORITHM.toString());
     SmartDashboard.putBoolean("Algae_EnableRectCheck", enableRectangularCheck);
     SmartDashboard.putBoolean("Algae_EnableAreaCheck", enableAreaRatioCheck);
-    SmartDashboard.putNumber("Algae_TargetOffsetX", targetOffsetX);
-    SmartDashboard.putNumber("Algae_TargetOffsetY", targetOffsetY);
+    SmartDashboard.putNumber("Algae_TargetOffsetX", TARGET_OFFSET_X);
+    SmartDashboard.putNumber("Algae_TargetOffsetY", TARGET_OFFSET_Y);
     SmartDashboard.putNumber("Algae_TY_Threshold", TY_THRESHOLD);
+    
+    // Display virtual points (read-only)
+    SmartDashboard.putNumber("Algae_VirtualBottomX", VIRTUAL_BOTTOM_X);
+    SmartDashboard.putNumber("Algae_VirtualBottomY", VIRTUAL_BOTTOM_Y);
   }
   
   private double[] calculateTargetPoint(RawDetection detection) {
@@ -278,16 +293,13 @@ public class AlgaeTrackCmd extends Command {
     double centerY = (minY + maxY) / 2.0;
     
     // bu da bizim hedef noktanın -30 +30 arası değeri
-    double targetX = centerX + (targetOffsetX * width / 2.0);
-    double targetY = centerY + (targetOffsetY * height / 2.0);
+    double targetX = centerX + (TARGET_OFFSET_X * width / 2.0);
+    double targetY = centerY + (TARGET_OFFSET_Y * height / 2.0);
 
     // Ensure target point is within bounds
     targetX = Math.max(minX, Math.min(maxX, targetX));
     targetY = Math.max(minY, Math.min(maxY, targetY));
 
-    // double[] resolution = getLimelightResolution();
-    // double resolutionX = resolution[0];
-    // double resolutionY = resolution[1];
     double resolutionX = 960.0;
     double resolutionY = 740.0;
     
@@ -509,7 +521,7 @@ public class AlgaeTrackCmd extends Command {
   private void displaySelectedAlgae() {
     // Update dashboard with selected algae information
     if (selectedAlgae != null) {
-      SmartDashboard.putString("Algae_SelectionAlgorithm", currentAlgorithm.toString());
+      SmartDashboard.putString("Algae_SelectionAlgorithm", CURRENT_SELECTION_ALGORITHM.toString());
       SmartDashboard.putNumber("Algae_Selected_ClassID", selectedAlgae.classId);
       SmartDashboard.putNumber("Algae_Selected_TX", selectedAlgae.txnc);
       SmartDashboard.putNumber("Algae_Selected_TY", selectedAlgae.tync);
@@ -528,7 +540,7 @@ public class AlgaeTrackCmd extends Command {
   
   // Public methods to configure algorithm and settings
   public void setSelectionAlgorithm(SelectionAlgorithm algorithm) {
-    currentAlgorithm = algorithm;
+    CURRENT_SELECTION_ALGORITHM = algorithm;
   }
   
   public void setRectangularCheckEnabled(boolean enabled) {
@@ -577,18 +589,12 @@ public class AlgaeTrackCmd extends Command {
     double targetX = targetPoint[0];
     double targetY = targetPoint[1];
     
-    // Create a virtual reference point below the screen
+    // Use global virtual reference point
     // This gives more stable angles and prevents extreme values
-    double bottomCenterX = 0; // Center X is 0 in angular coordinates
-    
-    // Instead of using the screen bottom (TY_MIN),
-    // use a point further down by half the screen height
-    double screenHeight = TY_MAX - TY_MIN;
-    double virtualBottomY = TY_MIN - (screenHeight / 2.0);
     
     // Calculate the horizontal and vertical differences
-    double deltaX = targetX - bottomCenterX;
-    double deltaY = virtualBottomY - targetY; // Using the virtual point below the screen
+    double deltaX = targetX - VIRTUAL_BOTTOM_X;
+    double deltaY = VIRTUAL_BOTTOM_Y - targetY; // Using the virtual point below the screen
     
     // Safety check for division by zero or very small values
     if (Math.abs(deltaY) < 0.001) {
@@ -622,7 +628,6 @@ public class AlgaeTrackCmd extends Command {
     SmartDashboard.putNumber("Algae_DeltaX", deltaX);
     SmartDashboard.putNumber("Algae_DeltaY", deltaY);
     SmartDashboard.putNumber("Algae_AngleDegrees", angleDegrees);
-    SmartDashboard.putNumber("Algae_VirtualBottomY", virtualBottomY);
     
     return normalizedAngle;
   }
