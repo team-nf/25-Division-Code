@@ -23,6 +23,7 @@ import frc.robot.commands.L4Cmd;
 import frc.robot.commands.L4PreCmd;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GripperSubsystem;
@@ -60,7 +61,9 @@ public class RobotContainer {
   private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
   private final ElevatorSubsystem m_elevatorSubsystem = new ElevatorSubsystem();
   private final GripperSubsystem m_gripperSubsystem = new GripperSubsystem();
-
+  // private final FunnelSubsystem m_funnelSubsystem = new FunnelSubsystem();
+  private final ClimbSubsystem m_climbSubsystem = new ClimbSubsystem();
+  
   private final MainMechStateMachine m_mainMech = new MainMechStateMachine(m_armSubsystem, m_elevatorSubsystem,
       m_gripperSubsystem);
 
@@ -746,6 +749,16 @@ public class RobotContainer {
      * .andThen(NamedCommands.getCommand("Algae23")));
      * 
      */
+
+    // Climb kontrolleri - basit manuel kontrol
+    // m_operatorController.create().whileTrue(m_climbSubsystem.windCommand()); // Yukarı - Create butonu
+    // m_operatorController.options().whileTrue(m_climbSubsystem.unwindCommand()); // Aşağı - Options butonu
+    
+    // // Climb durdurma
+    // m_operatorController.touchpad().and(m_operatorController.create()).onTrue(m_climbSubsystem.stopCommand()); // Durdurma
+    
+    // // Encoder sıfırlama
+    // m_operatorController.touchpad().and(m_operatorController.triangle()).onTrue(m_climbSubsystem.resetEncoderCommand());
   }
 
   /**
