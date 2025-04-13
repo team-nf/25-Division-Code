@@ -11,7 +11,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
-// import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.RawDetection;
@@ -51,11 +51,11 @@ public class AlgaeTrackCmd extends Command {
   private static final double TY_MIN = -24.85;
   private static final double TY_MAX = 24.85;
 
-  private static final double kForwardP = 5.0;
+  private static final double kForwardP = 3.0;
   private static final double kForwardD = 0.0;
   private static final double kForwardI = 0.0;
 
-  private static final double kRotationP = 1.5;
+  private static final double kRotationP = 0.9;
   private static final double kRotationD = 0.0;
   private static final double kRotationI = 0.0;
 
@@ -64,14 +64,12 @@ public class AlgaeTrackCmd extends Command {
   private static final double EDGE_MARGIN = 5.0;
   
   // Slew rate limiters (units per second)
-  private static final double FORWARD_RATE_LIMIT = 2.0;  // Meters per second per second
+  private static final double FORWARD_RATE_LIMIT = 3.0;  // Meters per second per second
   private static final double ROTATION_RATE_LIMIT = 6.0; // Radians per second per second
   private final SlewRateLimiter forwardLimiter;
   private final SlewRateLimiter rotationLimiter;
 
-  
-  // Height threshold - Only select objects in the bottom 60% of screen
-  private static final double HEIGHT_THRESHOLD_PERCENT = 0.8; // 60% from bottom of screen
+  private static final double HEIGHT_THRESHOLD_PERCENT = 0.9;
   
   // TY koordinatının yorumlanması:
   // TY_MIN: Ekranın alt kısmı (negatif değer, genellikle -24.85)
@@ -118,70 +116,6 @@ public class AlgaeTrackCmd extends Command {
 
   @Override
   public void initialize() {
-    // Initialize //Smart Dashboard values
-    //Smart Dashboard.putNumber("Algae_ForwardVelocity", 0);
-    //Smart Dashboard.putNumber("Algae_RotationVelocity", 0);
-    // //Smart Dashboard.putNumber("LL_TX", 0);
-    // //Smart Dashboard.putNumber("LL_TY", 0);
-    // //Smart Dashboard.putNumber("LL_TA", 0);
-    // //Smart Dashboard.putString("LL_DetectorClass", "");
-    // //Smart Dashboard.putNumber("LL_DetectorClassIndex", 0);
-    // //Smart Dashboard.putString("Algae_Algorithm", CURRENT_SELECTION_ALGORITHM.toString());
-    // //Smart Dashboard.putBoolean("Algae_EnableRectCheck", enableRectangularCheck);
-    // //Smart Dashboard.putBoolean("Algae_EnableAreaCheck", enableAreaRatioCheck);
-    //Smart Dashboard.putNumber("Algae_TargetOffsetX", TARGET_OFFSET_X);
-    //Smart Dashboard.putNumber("Algae_TargetOffsetY", TARGET_OFFSET_Y);
-    // //Smart Dashboard.putNumber("Algae_AreaRatio", 0);
-    // //Smart Dashboard.putNumber("Algae_LeftX", 0);
-    //Smart Dashboard.putNumber("Algae_TargetX", 0);
-    //Smart Dashboard.putNumber("Algae_TargetY", 0);
-    //Smart Dashboard.putNumber("Algae_MappedTX", 0);
-    //Smart Dashboard.putNumber("Algae_MappedTY", 0);
-    // //Smart Dashboard.putBoolean("LL_HasTarget", false);
-    // //Smart Dashboard.putNumber("LL_DetectionCount", 0);
-    // //Smart Dashboard.putNumber("Algae_Selected_ClassID", -1);
-    //Smart Dashboard.putNumber("Algae_Selected_TX", 0);
-    //Smart Dashboard.putNumber("Algae_Selected_TY", 0);
-    // //Smart Dashboard.putNumber("Algae_Selected_Area", 0);
-    //Smart Dashboard.putNumber("Algae_BB_w", 0);
-    //Smart Dashboard.putNumber("Algae_BB_h", 0);
-    // //Smart Dashboard.putNumber("Algae_SmoothForwardVelocity", 0);
-    // //Smart Dashboard.putNumber("Algae_SmoothRotationVelocity", 0);
-    //Smart Dashboard.putNumber("Algae_AngleToTarget", 0);
-    //Smart Dashboard.putNumber("Algae_TY_Threshold", TY_THRESHOLD);
-    //Smart Dashboard.putNumber("Algae_DeltaX", 0);
-    //Smart Dashboard.putNumber("Algae_DeltaY", 0);
-    //Smart Dashboard.putNumber("Algae_AngleDegrees", 0);
-    
-    // Virtual screen points - display only
-    //Smart Dashboard.putNumber("Algae_VirtualBottomX", VIRTUAL_BOTTOM_X);
-    //Smart Dashboard.putNumber("Algae_VirtualBottomY", VIRTUAL_BOTTOM_Y);
-
-    // Initialize line points with default values
-    // Line 1: from (0,0) to (1,1)
-    linePoints[0] = 0;  // point0_x
-    linePoints[1] = 0;  // point0_y
-    linePoints[2] = 1;  // point1_x
-    linePoints[3] = 1;  // point1_y
-    
-    // Line 2: from (0,1) to (1,0)
-    linePoints[4] = 0;  // point2_x
-    linePoints[5] = 1;  // point2_y
-    linePoints[6] = 1;  // point3_x
-    linePoints[7] = 0;  // point3_y
-    
-    // Display line points
-    for (int i = 0; i < 4; i++) {
-      //Smart Dashboard.putNumber("Line_Point" + i + "_X", linePoints[i*2]);
-      //Smart Dashboard.putNumber("Line_Point" + i + "_Y", linePoints[i*2+1]);
-    }
-    
-    // Calculate and display intersection
-    // double[] intersection = calculateLineIntersection();
-    //Smart Dashboard.putNumber("Line_Intersection_X", intersection[0]);
-    //Smart Dashboard.putNumber("Line_Intersection_Y", intersection[1]);
-    //Smart Dashboard.putBoolean("Line_Intersection_Valid", intersection[2] > 0);
-
     // Set limelight pipeline for neural detection and reset tracking
     LimelightHelpers.setPipelineIndex(limelightName, 0);
     selectedAlgae = null;
@@ -199,62 +133,25 @@ public class AlgaeTrackCmd extends Command {
     // Process detections and drive toward target if found
     processLimelightDetections();
     
-    // Update line intersection calculation
-    // double[] intersection;
-    // try {
-    //   intersection = calculateLineIntersection();
-    // } catch (Exception e) {
-    //   // Fallback in case the method itself throws an uncaught exception
-    //   System.out.println("Unexpected error in intersection calculation: " + e.getMessage());
-    //   intersection = new double[] {0, 0, 0};
-    // }
-    
-    //Smart Dashboard.putNumber("Line_Intersection_X", intersection[0]);
-    //Smart Dashboard.putNumber("Line_Intersection_Y", intersection[1]);
-    //Smart Dashboard.putBoolean("Line_Intersection_Valid", intersection[2] > 0);
-    
-    // Check for updated line points from //Smart Dashboard
-    // for (int i = 0; i < 4; i++) {
-    //   try {
-    //     double newX = //Smart Dashboard.getNumber("Line_Point" + i + "_X", linePoints[i*2]);
-    //     double newY = //Smart Dashboard.getNumber("Line_Point" + i + "_Y", linePoints[i*2+1]);
-        
-    //     if (newX != linePoints[i*2] || newY != linePoints[i*2+1]) {
-    //       linePoints[i*2] = newX;
-    //       linePoints[i*2+1] = newY;
-    //     }
-    //   } catch (Exception e) {
-    //     System.out.println("Error updating line point " + i + ": " + e.getMessage());
-    //   }
-    // }
-    
     if (selectedAlgae != null) {
       // Calculate target point
       double[] targetPoint = calculateTargetPoint(selectedAlgae);
       
       // Calculate angle to target using the target point
       double angleToTarget = calculateAngleToTarget(targetPoint);
-      
-      // Calculate Y error for forward movement
-      double mappedTX = map(targetPoint[0], TX_MIN, TX_MAX, -1.0, 1.0);
-      // double mappedTY = map(-targetPoint[1], TY_MIN, TY_MAX, 0.0, 1.0);
+      double mappedTY = 1 - map(targetPoint[1], TY_MIN, TY_MAX, 0.0, 1.0);
       
       // Use PID controllers
-      double forwardVelocity = forwardPID.calculate(mappedTX, 0);   // Target is 0 (minimum distance)
+      double forwardVelocity = forwardPID.calculate(mappedTY, 0);
+      SmartDashboard.putNumber("Algae_forwardVel", forwardVelocity);
+
       double rotationVelocity = rotationPID.calculate(angleToTarget, 0); // Target is center (0 angle)
       // double rotationVelocity = rotationPID.calculate(mappedTX, 0); // Target is center (0 angle)
       
       // Apply slew rate limiters for smoother motion
       double smoothForwardVelocity = forwardLimiter.calculate(forwardVelocity);
       // double smoothRotationVelocity = rotationLimiter.calculate(rotationVelocity);
-      
-      // Log control values
-      //Smart Dashboard.putNumber("Algae_AngleToTarget", angleToTarget);
-      //Smart Dashboard.putNumber("Algae_ForwardVelocity", forwardVelocity);
-      //Smart Dashboard.putNumber("Algae_RotationVelocity", rotationVelocity);
-      //Smart Dashboard.putNumber("Algae_SmoothForwardVelocity", smoothForwardVelocity);
-      // //Smart Dashboard.putNumber("Algae_SmoothRotationVelocity", smoothRotationVelocity);
-      
+
       // Drive robot using calculated velocities with rate limiting applied
       m_swerve.setControl(
         roboDrive
@@ -267,9 +164,7 @@ public class AlgaeTrackCmd extends Command {
     } else {
       // If no target, smoothly stop the robot
       double smoothForwardVelocity = forwardLimiter.calculate(0);
-      // double smoothRotationVelocity = rotationLimiter.calculate(0);
-      
-      // if (Math.abs(smoothForwardVelocity) > 0.01 || Math.abs(smoothRotationVelocity) > 0.01) {
+
       if (Math.abs(smoothForwardVelocity) > 0.01) {
         m_swerve.setControl(
           roboDrive
@@ -284,12 +179,9 @@ public class AlgaeTrackCmd extends Command {
   }
 
   private void processLimelightDetections() {
-    // Get and process vision data, selecting the best target
     boolean hasTarget = LimelightHelpers.getTV(limelightName);
-    // //Smart Dashboard.putBoolean("LL_HasTarget", hasTarget);
     
     if (hasTarget) {
-      updateLimelightData();
       RawDetection[] detections = LimelightHelpers.getRawDetections(limelightName);
       
       if (detections != null && detections.length > 0) {
@@ -300,12 +192,6 @@ public class AlgaeTrackCmd extends Command {
           case LOWEST_FIRST:
             selectLowestAlgae(detections);
             break;
-          // case LOWER_CENTER_CLOSEST:
-          //   selectClosestToBottomCenter(detections);
-          //   break;
-          // case BIGGEST:
-          //   selectBiggestAlgae(detections);
-          //   break;
           default:
             selectLowestAlgae(detections);
             break;
@@ -318,29 +204,6 @@ public class AlgaeTrackCmd extends Command {
       // //Smart Dashboard.putNumber("LL_DetectionCount", 0);
       selectedAlgae = null;
     }
-    
-    displaySelectedAlgae();
-  }
-  
-  private void updateLimelightData() {
-    // Update //Smart Dashboard with basic Limelight data
-    // //Smart Dashboard.putNumber("LL_TX", LimelightHelpers.getTX(limelightName));
-    // //Smart Dashboard.putNumber("LL_TY", LimelightHelpers.getTY(limelightName));
-    // //Smart Dashboard.putNumber("LL_TA", LimelightHelpers.getTA(limelightName));
-    // //Smart Dashboard.putString("LL_DetectorClass", LimelightHelpers.getDetectorClass(limelightName));
-    // //Smart Dashboard.putNumber("LL_DetectorClassIndex", LimelightHelpers.getDetectorClassIndex(limelightName));
-    
-    // Display algorithm and filter settings
-    // //Smart Dashboard.putString("Algae_Algorithm", CURRENT_SELECTION_ALGORITHM.toString());
-    // //Smart Dashboard.putBoolean("Algae_EnableRectCheck", enableRectangularCheck);
-    // //Smart Dashboard.putBoolean("Algae_EnableAreaCheck", enableAreaRatioCheck);
-    //Smart Dashboard.putNumber("Algae_TargetOffsetX", TARGET_OFFSET_X);
-    //Smart Dashboard.putNumber("Algae_TargetOffsetY", TARGET_OFFSET_Y);
-    //Smart Dashboard.putNumber("Algae_TY_Threshold", TY_THRESHOLD);
-    
-    // Display virtual points (read-only)
-    //Smart Dashboard.putNumber("Algae_VirtualBottomX", VIRTUAL_BOTTOM_X);
-    //Smart Dashboard.putNumber("Algae_VirtualBottomY", VIRTUAL_BOTTOM_Y);
   }
   
   private double[] calculateTargetPoint(RawDetection detection) {
@@ -374,15 +237,7 @@ public class AlgaeTrackCmd extends Command {
     
     double targetPointX = normalizedX * (TX_MAX - TX_MIN);
     double targetPointY = normalizedY * (TY_MAX - TY_MIN); 
-    
-    // Log for debugging
-    //Smart Dashboard.putNumber("Algae_BB_w", width);
-    //Smart Dashboard.putNumber("Algae_BB_h", height);
-    //Smart Dashboard.putNumber("Algae_TargetX", targetX);
-    //Smart Dashboard.putNumber("Algae_TargetY", targetY);
-    //Smart Dashboard.putNumber("Algae_TargetPointX", targetPointX);
-    //Smart Dashboard.putNumber("Algae_TargetPointY", targetPointY);
-    
+
     return new double[] {targetPointX , targetPointY};
   }
   
@@ -529,81 +384,13 @@ public class AlgaeTrackCmd extends Command {
     }
   }
   
-  // private void selectClosestToBottomCenter(RawDetection[] detections) {
-  //   // Select algae closest to bottom center that passes validation
-  //   selectedAlgae = null;
-  //   double closestDistance = Double.MAX_VALUE;
-    
-  //   for (RawDetection detection : detections) {
-  //     // Skip if the detection is too high on the screen (top 40%)
-  //     if (detection.tync > TY_THRESHOLD) {
-  //       continue;
-  //     }
-      
-  //     if (!isBoxSquarish(detection) || !hasValidAreaRatio(detection)) {
-  //       continue;
-  //     }
-      
-  //     // Calculate distance to bottom center (approximately (0, TY_MIN))
-  //     double distToBottomCenter = Math.sqrt(
-  //         Math.pow(detection.txnc, 2) + 
-  //         Math.pow(detection.tync - TY_MIN, 2));
-      
-  //     if (distToBottomCenter < closestDistance) {
-  //       closestDistance = distToBottomCenter;
-  //       selectedAlgae = detection;
-  //     }
-  //   }
-  // }
-  
-  // private void selectBiggestAlgae(RawDetection[] detections) {
-  //   // Select the largest algae (by area) that passes validation
-  //   selectedAlgae = null;
-  //   double largestArea = -Double.MAX_VALUE;
-    
-  //   for (RawDetection detection : detections) {
-  //     // Skip if the detection is too high on the screen (top 40%)
-  //     if (detection.tync > TY_THRESHOLD) {
-  //       continue;
-  //     }
-      
-  //     if (!isBoxSquarish(detection) || !hasValidAreaRatio(detection)) {
-  //       continue;
-  //     }
-      
-  //     if (detection.ta > largestArea) {
-  //       largestArea = detection.ta;
-  //       selectedAlgae = detection;
-  //     }
-  //   }
-  // }
   
   private double map(double value, double inMin, double inMax, double outMin, double outMax) {
     // Map a value from one range to another
     value = Math.max(inMin, Math.min(inMax, value));
     return outMin + (value - inMin) * (outMax - outMin) / (inMax - inMin);
   }
-  
-  private void displaySelectedAlgae() {
-    // Update dashboard with selected algae information
-    if (selectedAlgae != null) {
-      // //Smart Dashboard.putString("Algae_SelectionAlgorithm", CURRENT_SELECTION_ALGORITHM.toString());
-      // //Smart Dashboard.putNumber("Algae_Selected_ClassID", selectedAlgae.classId);
-      //Smart Dashboard.putNumber("Algae_Selected_TX", selectedAlgae.txnc);
-      //Smart Dashboard.putNumber("Algae_Selected_TY", selectedAlgae.tync);
-      // //Smart Dashboard.putNumber("Algae_Selected_Area", selectedAlgae.ta);
-    } else {
-      // //Smart Dashboard.putString("Algae_SelectionAlgorithm", "None");
-      // //Smart Dashboard.putNumber("Algae_Selected_ClassID", -1);
-      //Smart Dashboard.putNumber("Algae_Selected_TX", 0);
-      //Smart Dashboard.putNumber("Algae_Selected_TY", 0);
-      //Smart Dashboard.putNumber("Algae_MappedTX", 0);
-      //Smart Dashboard.putNumber("Algae_MappedTY", 0);
-      //Smart Dashboard.putNumber("Algae_RotationVelocity", 0);
-      //Smart Dashboard.putNumber("Algae_ForwardVelocity", 0);
-    }
-  }
-  
+
   // Public methods to configure algorithm and settings
   public void setSelectionAlgorithm(SelectionAlgorithm algorithm) {
     CURRENT_SELECTION_ALGORITHM = algorithm;
@@ -639,16 +426,6 @@ public class AlgaeTrackCmd extends Command {
     return false;
   }
 
-  /**
-   * Calculates the angle to the target using a simple right triangle approach.
-   * Forms a right triangle with vertices at:
-   * 1. The target point (x, y)
-   * 2. A virtual point below the screen's bottom center
-   * 3. A point directly below the target at the same height as the virtual point
-   * 
-   * @param targetPoint The target point [x, y] in screen space
-   * @return The angle to the target in degrees (-1 to 1 range, suitable for PID)
-   */
   private double calculateAngleToTarget(double[] targetPoint) {
     try {
       // Target coordinates
@@ -687,12 +464,7 @@ public class AlgaeTrackCmd extends Command {
       // Normalize to [-1, 1] for PID controller
       double normalizedAngle = angleDegrees / 45.0;
       normalizedAngle = Math.max(-1.0, Math.min(1.0, normalizedAngle));
-      
-      // Log for debugging
-      //Smart Dashboard.putNumber("Algae_DeltaX", deltaX);
-      //Smart Dashboard.putNumber("Algae_DeltaY", deltaY);
-      //Smart Dashboard.putNumber("Algae_AngleDegrees", angleDegrees);
-      
+
       return normalizedAngle;
     } catch (Exception e) {
       // Error handling
@@ -700,70 +472,4 @@ public class AlgaeTrackCmd extends Command {
       return 0.0; // Default safe value
     }
   }
-
-  /**
-   * Calculates the intersection point of two lines.
-   * Line 1 is defined by points 0 and 1 in the linePoints array.
-   * Line 2 is defined by points 2 and 3 in the linePoints array.
-   * 
-   * @return An array containing [x, y, valid] where:
-   *   - x, y are the coordinates of the intersection point
-   *   - valid is 1.0 if the lines intersect, 0.0 if they are parallel or an error occurs
-   */
-  // private double[] calculateLineIntersection() {
-  //   try {
-  //     // Extract points from the array
-  //     double x1 = linePoints[0];
-  //     double y1 = linePoints[1];
-  //     double x2 = linePoints[2];
-  //     double y2 = linePoints[3];
-      
-  //     double x3 = linePoints[4];
-  //     double y3 = linePoints[5];
-  //     double x4 = linePoints[6];
-  //     double y4 = linePoints[7];
-      
-  //     // Calculate the denominator
-  //     double denominator = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
-      
-  //     // If denominator is 0, lines are parallel or coincident
-  //     if (Math.abs(denominator) < 1e-10) {
-  //       return new double[] {0, 0, 0}; // No intersection, return origin and invalid flag
-  //     }
-      
-  //     // Calculate the intersection point using the formula for line intersection
-  //     double ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denominator;
-      
-  //     // Calculate intersection coordinates
-  //     double intersectionX = x1 + ua * (x2 - x1);
-  //     double intersectionY = y1 + ua * (y2 - y1);
-      
-  //     // Check for NaN or infinity
-  //     if (Double.isNaN(intersectionX) || Double.isInfinite(intersectionX) ||
-  //         Double.isNaN(intersectionY) || Double.isInfinite(intersectionY)) {
-  //       return new double[] {0, 0, 0}; // Invalid results
-  //     }
-      
-  //     return new double[] {intersectionX, intersectionY, 1.0}; // Valid intersection
-  //   } catch (ArithmeticException | ArrayIndexOutOfBoundsException | NullPointerException e) {
-  //     // Log error to console
-  //     System.out.println("Error in calculateLineIntersection: " + e.getMessage());
-  //     // Return default values in case of any error
-  //     return new double[] {0, 0, 0};
-  //   }
-  // }
-  
-  /**
-   * Sets new values for the 4 points used in line intersection.
-   * 
-   * @param pointIndex The index of the point (0-3)
-   * @param x The x-coordinate
-   * @param y The y-coordinate
-   */
-  // public void setLinePoint(int pointIndex, double x, double y) {
-  //   if (pointIndex >= 0 && pointIndex < 4) {
-  //     linePoints[pointIndex * 2] = x;
-  //     linePoints[pointIndex * 2 + 1] = y;
-  //   }
-  // }
 } 

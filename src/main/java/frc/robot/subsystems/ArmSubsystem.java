@@ -339,7 +339,7 @@ public class ArmSubsystem extends SubsystemBase {
         goalJ1 = armJ1limitCW;
       }
 
-      if(SmartDashboard.getNumber("Elevator/ElevatorHeight", 0.1) < 0.25 && goalJ1 < 90)
+      if(SmartDashboard.getNumber("Elevator/ElevatorHeight", 0.1) < 0.24 && goalJ1 < 90)
             goalJ1 = 90;
       
 
