@@ -52,6 +52,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -109,15 +110,25 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     .withDeadband(MaxSpeed * 0.035)
     .withDriveRequestType(DriveRequestType.Velocity);
 
-    PIDController autoControllerX = new PIDController(
-        2.5, 0.8, 0.2);
+    PIDController reefPIDX = new PIDController(
+        2.5, 1, 0.2);
     
-    PIDController autoControllerY = new PIDController(
-        2.5, 0.8, 0.2);
+    PIDController reefPIDY = new PIDController(
+        2.5, 1, 0.2);
 
     private final PhoenixPIDController headingController = new PhoenixPIDController(2, 0., 0.);
 
+    PIDController autoControllerX = new PIDController(
+        2.5, 1, 0.2);
+    
+    PIDController autoControllerY = new PIDController(
+        2.5, 1, 0.2);
+
     private final double errorLimit = 0.025;
+    private final double errorLimitAuto = 0.06;
+
+    private final SendableChooser<Boolean> m_isLeftVisionEnabled = new SendableChooser<>();
+    private final SendableChooser<Boolean> m_isRightVisionEnabled = new SendableChooser<>();
 
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
@@ -314,8 +325,15 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         if (Robot.isReal())
         {
-            updateOdometryWithLL("limelight-r");
-            updateOdometryWithLL("limelight-l");
+            if(m_isRightVisionEnabled.getSelected())
+            {            
+                updateOdometryWithLL("limelight-r");
+            }
+            if(m_isLeftVisionEnabled.getSelected())
+            {            
+                updateOdometryWithLL("limelight-l");
+
+            }
             //updateOdometryWithLL_mt1();
             publisher.set(new Pose3d(getState().Pose.getX(),getState().Pose.getY(),0, new Rotation3d(getState().Pose.getRotation())));
         }
@@ -577,6 +595,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return AutoBuilder.pathfindToPose(intakeTargetPose2d, getConstraints());
     }
 
+    public Command goToIntakeWithPid(int id)
+    {
+        Pose3d aprilTagPose = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape).getTagPose(id).orElse(new Pose3d(3,3,0, new Rotation3d(0,0,0)));
+        Pose2d aprilTagPose2d = new Pose2d(aprilTagPose.getX(), aprilTagPose.getY(), new Rotation2d(aprilTagPose.getRotation().getZ()));
+        Pose2d intakeTargetPose2d = new Pose2d();
+
+        intakeTargetPose2d = aprilTagPose2d.transformBy(AutoConstants.IntakeCoralByTag);
+
+        return goToPointPIDAuto(intakeTargetPose2d);
+    }
+
     public Command goToIntakeAuto(int id)
     {
         Pose3d aprilTagPose = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape).getTagPose(id).orElse(new Pose3d(3,3,0, new Rotation3d(0,0,0)));
@@ -645,7 +674,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         String mt_state = "null";
 
         if (llMeasurement != null && llMeasurement.tagCount > 0 && Math.abs(omegaRps) < 2 
-                && llMeasurement.avgTagDist < 4.5 && driveSpeed < 2) 
+                && llMeasurement.avgTagDist < 3.2 && driveSpeed < 2) 
         {
           if(llMeasurement.avgTagDist < AutoConstants.MT1_DIST && driveSpeed < 0.6
                     && llMeasurement.rawFiducials[0].ta > AutoConstants.LL_Accuracy_mt1)
@@ -757,6 +786,31 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     {
         driveToPoint.HeadingController = headingController;
         driveToPoint.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
+        reefPIDX.setSetpoint(pose.getX());
+        reefPIDY.setSetpoint(pose.getY());
+
+        return run(() -> {
+            if(reefPIDX.getSetpoint() != pose.getX()) reefPIDX.setSetpoint(pose.getX());
+            if(reefPIDY.getSetpoint() != pose.getY()) reefPIDY.setSetpoint(pose.getY());
+
+            SmartDashboard.putNumber("PID-XError", reefPIDX.getPositionError());
+            SmartDashboard.putNumber("PID-YError", reefPIDY.getPositionError());
+
+            this.setControl(driveToPoint.withVelocityX(-reefPIDX.calculate(getState().Pose.getX()))
+                                        .withVelocityY(-reefPIDY.calculate(getState().Pose.getY()))
+                                        .withTargetDirection(pose.getRotation().minus(new Rotation2d(Math.PI))));
+
+        }).until(() -> {
+            return Math.abs(reefPIDX.getPositionError()) < errorLimit 
+                    && Math.abs(reefPIDY.getPositionError()) < errorLimit 
+                        && driveToPoint.HeadingController.getPositionError() < 3;
+        }).finallyDo(() -> {reefPIDX.reset();reefPIDY.reset();});
+    }
+
+    public Command goToPointPIDAuto(Pose2d pose)
+    {
+        driveToPoint.HeadingController = headingController;
+        driveToPoint.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
         autoControllerX.setSetpoint(pose.getX());
         autoControllerY.setSetpoint(pose.getY());
 
@@ -765,17 +819,16 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             if(autoControllerY.getSetpoint() != pose.getY()) autoControllerY.setSetpoint(pose.getY());
 
             SmartDashboard.putNumber("PID-XError", autoControllerX.getPositionError());
-            SmartDashboard.putNumber("PID-YError", autoControllerY.getPositionError());
+            SmartDashboard.putNumber("PID-YError", autoControllerX.getPositionError());
 
             this.setControl(driveToPoint.withVelocityX(-autoControllerX.calculate(getState().Pose.getX()))
                                         .withVelocityY(-autoControllerY.calculate(getState().Pose.getY()))
                                         .withTargetDirection(pose.getRotation().minus(new Rotation2d(Math.PI))));
 
         }).until(() -> {
-            return Math.abs(autoControllerX.getPositionError()) < errorLimit 
-                    && Math.abs(autoControllerY.getPositionError()) < errorLimit 
-                        && driveToPoint.HeadingController.getPositionError() < 3;
-        }).finallyDo(() -> {autoControllerX.reset();autoControllerY.reset();});
+            return Math.abs(autoControllerX.getPositionError()) < errorLimitAuto
+                    && Math.abs(autoControllerY.getPositionError()) < errorLimitAuto;
+        }).finallyDo(() -> {autoControllerX.reset();autoControllerY.reset();stopChassis();});
     }
 
     public Command getOut()
@@ -783,8 +836,20 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         return run(() -> setControl(roboDrive.withVelocityX(-0.8))).withTimeout(0.5);
     }
 
-    public void poseEstimatorConfig()
+    public void initializeSomeStuff()
+    {  
+        m_isLeftVisionEnabled.setDefaultOption("Yes", true);
+        m_isLeftVisionEnabled.addOption("No", false);
+        m_isRightVisionEnabled.setDefaultOption("Yes", true);
+        m_isRightVisionEnabled.addOption("No", false);
+
+        SmartDashboard.putData("LeftVisionEnable", m_isLeftVisionEnabled);
+        SmartDashboard.putData("RightVisionEnable", m_isRightVisionEnabled);
+
+    }
+
+    public void stopChassis()
     {
-        
+        this.setControl(roboDrive.withVelocityX(0).withVelocityY(0));
     }
 }

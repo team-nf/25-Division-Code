@@ -13,6 +13,8 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.Constants.Elevator;
 import frc.robot.Constants.StatePositions;
 import frc.robot.sims.MainRobotMechanism;
@@ -205,8 +207,16 @@ public class MainMechStateMachine {
         reachGoal(StatePositions.AlgaeStage23[0], StatePositions.AlgaeStage23[1], StatePositions.AlgaeStage23[2]);
     }
 
+    public void Algae23FromL4() {
+        reachGoal(StatePositions.AlgaeStage23FromL4[0], StatePositions.AlgaeStage23FromL4[1], StatePositions.AlgaeStage23FromL4[2]);
+    }
+
     public void Algae34() {
         reachGoal(StatePositions.AlgaeStage34[0], StatePositions.AlgaeStage34[1], StatePositions.AlgaeStage34[2]);
+    }
+
+    public void Algae34FromL4() {
+        reachGoal(StatePositions.AlgaeStage34FromL4[0], StatePositions.AlgaeStage34FromL4[1], StatePositions.AlgaeStage34FromL4[2]);
     }
 
     public void Algae34ToCarry() {
@@ -282,5 +292,13 @@ public class MainMechStateMachine {
     {
         return armJ1Angle < StatePositions.AlgaeGround[1] * 1.25 
                     && eleGeneralHeight > StatePositions.AlgaeGround[0] * 0.75;
+    }
+
+    public Command resetMechanismsCmd() {
+        return new ParallelCommandGroup(m_armSubsystem.resetArmPositionsCmd(), m_elevatorSubsystem.resetMotorPositionCmd());
+    }
+
+    public Command resetEncodersCmd() {
+        return new ParallelCommandGroup(m_armSubsystem.resetEncoderCmd(), m_elevatorSubsystem.resetEncoderCmd());
     }
 }

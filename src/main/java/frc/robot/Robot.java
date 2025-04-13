@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathfindingCommand;
 
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -17,6 +18,8 @@ public class Robot extends TimedRobot {
 
   public Robot() {
     m_robotContainer = new RobotContainer();
+    
+    PathfindingCommand.warmupCommand().schedule();
   }
 
   @Override
@@ -37,6 +40,7 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     m_autonomousCommand = m_robotContainer.getAutoTest();
+    
     //m_autonomousCommand = m_robotContainer.getAutonomousCommand();
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
@@ -56,7 +60,7 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
-    NamedCommands.getCommand("Closed").schedule();
+    m_robotContainer.eleReadyCmd().schedule();
   }
 
   @Override

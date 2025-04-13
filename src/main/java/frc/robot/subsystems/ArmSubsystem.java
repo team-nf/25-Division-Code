@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.CoastOut;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.StaticBrake;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -45,6 +46,9 @@ public class ArmSubsystem extends SubsystemBase {
 
   private final MotionMagicVoltage m_firstJointMotionMagic = new MotionMagicVoltage(0).withSlot(0);
   private final MotionMagicVoltage m_secondJointMotionMagic = new MotionMagicVoltage(0).withSlot(0);
+
+  private final MotionMagicVelocityVoltage m_firstJointMotionMagicVel = new MotionMagicVelocityVoltage(0).withSlot(1);
+  private final MotionMagicVelocityVoltage m_secondJointMotionMagicVel = new MotionMagicVelocityVoltage(0).withSlot(1);
 
   private final ArmHalfEncoder m_firstJointHalfcoder = new ArmHalfEncoder(Arm.FirstJoint.kEncoderChannel, false, false);
   private final ArmHalfEncoder m_secondJointHalfcoder = new ArmHalfEncoder(Arm.SecondJoint.kEncoderChannel, true, false);
@@ -320,8 +324,8 @@ public class ArmSubsystem extends SubsystemBase {
 
   public void reachGoal(double goalJ1, double goalJ2) 
   {
-    if(isArmReady && !isInitialReady && SmartDashboard.getNumber("Arm/J2/M-StartPos", 0) > 120 && 
-    SmartDashboard.getNumber("Arm/J1/M-StartPos", 0) > 160) 
+    if(isArmReady && !isInitialReady && SmartDashboard.getNumber("Arm/J2/M-StartPos", 0) > 100 && 
+    SmartDashboard.getNumber("Arm/J1/M-StartPos", 0) > 140) 
             isInitialReady = true;
 
     if(isInitialReady)
@@ -489,6 +493,41 @@ public class ArmSubsystem extends SubsystemBase {
   public void setJ2Offset(double offset)
   {
     j2Offset = offset;
+  }
+
+  public void speedControlJ1(double j1)
+  {
+    //m_armFirstJointMotor.setControl(m_firstJointMotionMagicVel.withVelocity(j1
+    //*Arm.FirstJoint.kArmReduction));
+    m_armFirstJointMotor.set(j1);
+  }
+
+  public void speedControlJ2(double j2)
+  {
+    //m_armSecondJointMotor.setControl(m_secondJointMotionMagicVel.withVelocity(j2
+    //*Arm.SecondJoint.kArmReduction));
+    m_armSecondJointMotor.set(j2);
+
+  }
+
+  public Command turnJ1(double v)
+  {
+    return run(() -> speedControlJ1(v)).finallyDo(this::brakeMotors);
+  }
+
+  public Command turnJ2(double v)
+  {
+    return run(() -> speedControlJ2(v)).finallyDo(this::brakeMotors);
+  }
+
+  public Command resetArmPositionsCmd()
+  {
+    return runOnce(() -> resetArmPositions());
+  }
+
+  public Command resetEncoderCmd()
+  {
+    return runOnce(() -> resetEncoders());
   }
 
 }

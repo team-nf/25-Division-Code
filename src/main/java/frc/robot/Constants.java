@@ -198,8 +198,8 @@ public final class Constants {
     public static final double kElevatorDistPerRotation = 0.02;
     public static final double kCarriageMass = 13.0; // kg
 
-    public static final double kAmpLimit = 37.5;
-    public static final double kVoltageLimit = 9;
+    public static final double kAmpLimit = 37;
+    public static final double kVoltageLimit = 8;
 
     public static final double kSetpointMeters = 0.75;
     // Encoder is reset to measure 0 at the bottom, so minimum height is 0.
@@ -211,26 +211,44 @@ public final class Constants {
     public static final double minHeightForL4 = 0.25;
   }
 
+  public class FunnelConstants {
+
+    public static final int kLeftSensor = 6;
+    public static final int kRightSensor = 5;
+
+  }
+
   public class StatePositions
   {
     // Length, Angle 1, Angle 2
     
     public static final double angleOffset = -7;
-    public static final double[] CoralIntake = {0.025, 212, 112};    //Coral Intake 217.5 110
+
+    public static final double[] CoralIntake = {0.03, 211, 105};    //Coral Intake 217.5 110
+
     public static final double[] CoralStage1 = {0.05, 150, 160};      //Coral Stage 1
     public static final double[] CoralStage2 = {0.22, 150, 160};   //Coral Stage 2
     public static final double[] CoralStage3 = {0.63, 150, 160};    //Coral Stage 3
     public static final double[] CoralStage4 = {1.45, 152, 135};    //Coral Stage 4
+
     public static final double[] CoralStage4Pre = {1.45, 160, 152};    //Coral Stage 4
     public static final double[] CoralCarry = {0.025, 180, 160};    //Coral Carry
+
+
     public static final double[] AlgaeThrowNet = {1.56, 180, 225};    //Algae Shoot
     public static final double[] AlgaeRecoverNet = {1.38, 190, 170};    //Algae Recover After Net
     public static final double[] AlgaeThrowProcessor = {0.02, 90, 280};    //Algae Shoot
+
     public static final double[] AlgaeStage23 = {0.40, 120, 233};     //Algae Stage 2-3
+    public static final double[] AlgaeStage23FromL4 = {0.40, 120, 233};     //Algae Stage 2-3
     public static final double[] AlgaeStage34 = {0.8, 120, 233};     //Algae Stage 3-4
+    public static final double[] AlgaeStage34FromL4 = {0.8, 120, 233};     //Algae Stage 3-4
+
     public static final double[] AlgaeGround = {0.28, 45, 257.5};  //Algae Ground
     public static final double[] AlgaeFromCoral = {0.25, 180, 180};  //Algae Ground
     public static final double[] AlgaeCarry = {0.25, 160, 210};  //Algae Ground
+
+    
     public static final double[] Closed = {0.06, 180, 180};  //Closed
     public static final double[] FullyClosed = {0.01, 180, 180};
 
@@ -316,7 +334,7 @@ public final class Constants {
     public static final Transform2d IntakeCoralByTag =  new Transform2d(TAG13_POSE2D, intakeCoral13Pose2D);
 
     public static final double LL_Accuracy_mt1 = 0.03;
-    public static final double MT1_DIST = 0.8;
+    public static final double MT1_DIST = 0.75;
   }
 
   public class PathConstants

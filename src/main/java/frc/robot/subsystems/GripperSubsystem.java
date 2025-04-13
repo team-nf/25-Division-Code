@@ -9,6 +9,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -36,6 +37,8 @@ public class GripperSubsystem extends SubsystemBase {
   private final DigitalInput m_coralSensor = new DigitalInput(GripperConstants.kCoralSensor);
 
   private double autoCoralCounter = 0;
+
+  private boolean isCoralStuck = false;
 
   /** 
    * Creates a new GripperSubsystem. 
@@ -86,12 +89,39 @@ public class GripperSubsystem extends SubsystemBase {
     return run(() -> the_hupletici.set(-0.6)).until(this::hasNotCoral).finallyDo(this::stop);
   }
 
+  /** 
   public void AutoCoral()
   {
     autoCoralCounter ++;
     if(autoCoralCounter <= 70) the_hupletici.set(-0.3);
     else if(autoCoralCounter <= 72) the_hupletici.stopMotor();
     else autoCoralCounter = 0;
+
+    if(the_hupletici.getTorqueCurrent() > 6)
+    {
+      the_hupletici.set(-0.3);
+      autoCoralCounter = 0;
+    }
+
+  } **/
+
+  public void AutoCoral()
+  {
+    if(isCoralStuck)
+    {
+      autoCoralCounter++;
+      if(autoCoralCounter > 1 && the_hupletici.getSupplyCurrent().getValueAsDouble() < 12.5)
+      {
+        isCoralStuck = false;
+        autoCoralCounter = 0;
+      }
+      else the_hupletici.set(0.15);
+    }
+    else
+    {
+      the_hupletici.set(-0.3);
+      if(the_hupletici.getSupplyCurrent().getValueAsDouble() > 20) isCoralStuck = true;
+    }
 
   }
   

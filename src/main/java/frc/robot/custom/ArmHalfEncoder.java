@@ -4,6 +4,8 @@
 
 package frc.robot.custom;
 
+import javax.print.attribute.standard.PrinterInfo;
+
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
@@ -37,7 +39,7 @@ public class ArmHalfEncoder {
 
     public void calcAngle()
     {
-        if(Math.abs(lastRawAngle - getRawEncoder()) > 350) firstHalf = !firstHalf;
+        if(Math.abs(lastRawAngle - getRawEncoder()) > 340) firstHalf = !firstHalf;
         lastRawAngle = getRawEncoder();
         jointAngleHolder = (getRawEncoder()/2 + (firstHalf ? 0 : 180)) - startAngle;
         if (jointAngleHolder < 0) jointAngleHolder += 360;
@@ -53,8 +55,7 @@ public class ArmHalfEncoder {
     }
 
     public void reset() {
-        firstHalf = true;
-        startAngle = getRawEncoder()/2;
+        firstHalf = false;
         lastRawAngle = getRawEncoder();
         SmartDashboard.putNumber("Arm/HalfEncoderStart-" + Double.toString(theId + 1), startAngle);
     }

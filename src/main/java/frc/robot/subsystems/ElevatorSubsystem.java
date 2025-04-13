@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -21,6 +22,7 @@ import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.Arm;
 import frc.robot.Constants.Elevator;
 
 import static edu.wpi.first.units.Units.*;
@@ -31,8 +33,9 @@ public class ElevatorSubsystem extends SubsystemBase {
   private final TalonFX m_slaveMotor = new TalonFX(Elevator.kMotor2Port);
 
   private final TalonFXConfiguration m_talonConfig = new TalonFXConfiguration();
-  private final PositionVoltage m_positionControl = new PositionVoltage(0).withSlot(0);
   private final MotionMagicVoltage m_motionMagic = new MotionMagicVoltage(0);
+  private final MotionMagicVelocityVoltage m_motionMagicVel = new MotionMagicVelocityVoltage(0).withSlot(1);
+
   private final NeutralOut m_neutral = new NeutralOut();
   private final StaticBrake m_brake = new StaticBrake();
 
@@ -100,12 +103,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
   }
 
-  public void reachGoal(double goal, boolean useMotionMagic) {
-    if (!useMotionMagic) {
-    m_motor.setControl(m_positionControl.withPosition(goal / (Elevator.kElevatorDrumRadius * 2 * Math.PI / Elevator.kElevatorGearing)));
-    } else {reachGoal(goal);}
-  }
-
   public void reachGoal(double goal) {
     
     if(goal < Elevator.kMinElevatorHeightMeters) goal = Elevator.kMinElevatorHeightMeters;
@@ -153,4 +150,27 @@ public class ElevatorSubsystem extends SubsystemBase {
                                                                              && m_motor.getPosition().getValueAsDouble() == 0);
     return isMotorsSet;
   }
+
+    public void speedControl(double v)
+  {
+    //m_motor.setControl(m_motionMagicVel.withVelocity(v*Arm.SecondJoint.kArmReduction));
+    m_motor.set(v);
+  }
+
+  public Command eleSpeedControl(double v)
+  {
+    return run(() -> speedControl(v)).finallyDo(this::stop);
+  }
+
+  public Command resetMotorPositionCmd()
+  {
+    return runOnce(() -> resetMotorPosition());
+  }
+
+  public Command resetEncoderCmd()
+  {
+    return runOnce(() -> m_motor.setPosition(0));
+  }
+
+
 }
