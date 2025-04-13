@@ -26,6 +26,10 @@ public class AlgaeTrackCmd extends Command {
     BIGGEST              // Select largest algae by area
   }
   
+  // Points array to store 4 points for line intersection calculation
+  // Format: [point0_x, point0_y, point1_x, point1_y, point2_x, point2_y, point3_x, point3_y]
+  private static final double[] linePoints = new double[8];
+  
   // Subsystem and limelight configuration
   private CommandSwerveDrivetrain m_swerve;
   private final String limelightName = "limelight-obj";
@@ -67,8 +71,15 @@ public class AlgaeTrackCmd extends Command {
 
   
   // Height threshold - Only select objects in the bottom 60% of screen
-  private static final double HEIGHT_THRESHOLD_PERCENT = 0.6; // 60% from bottom of screen
-  private static final double TY_THRESHOLD = TY_MIN + ((TY_MAX - TY_MIN) * (1 - HEIGHT_THRESHOLD_PERCENT));
+  private static final double HEIGHT_THRESHOLD_PERCENT = 0.8; // 60% from bottom of screen
+  
+  // TY koordinatının yorumlanması:
+  // TY_MIN: Ekranın alt kısmı (negatif değer, genellikle -24.85)
+  // TY_MAX: Ekranın üst kısmı (pozitif değer, genellikle +24.85)
+  // 
+  // Doğru hesaplama: Ekranın en altından (TY_MIN) başlayarak 
+  // toplam yüksekliğin (TY_MAX - TY_MIN) yüzde 60'ı kadar yukarı git
+  private static final double TY_THRESHOLD = TY_MIN + ((TY_MAX - TY_MIN) * HEIGHT_THRESHOLD_PERCENT);
   
   // Virtual screen points for angle calculation
   private static final double VIRTUAL_BOTTOM_X = 0.0; // Default center X is 0 in angular coordinates
@@ -146,6 +157,31 @@ public class AlgaeTrackCmd extends Command {
     SmartDashboard.putNumber("Algae_VirtualBottomX", VIRTUAL_BOTTOM_X);
     SmartDashboard.putNumber("Algae_VirtualBottomY", VIRTUAL_BOTTOM_Y);
 
+    // Initialize line points with default values
+    // Line 1: from (0,0) to (1,1)
+    linePoints[0] = 0;  // point0_x
+    linePoints[1] = 0;  // point0_y
+    linePoints[2] = 1;  // point1_x
+    linePoints[3] = 1;  // point1_y
+    
+    // Line 2: from (0,1) to (1,0)
+    linePoints[4] = 0;  // point2_x
+    linePoints[5] = 1;  // point2_y
+    linePoints[6] = 1;  // point3_x
+    linePoints[7] = 0;  // point3_y
+    
+    // Display line points
+    for (int i = 0; i < 4; i++) {
+      SmartDashboard.putNumber("Line_Point" + i + "_X", linePoints[i*2]);
+      SmartDashboard.putNumber("Line_Point" + i + "_Y", linePoints[i*2+1]);
+    }
+    
+    // Calculate and display intersection
+    double[] intersection = calculateLineIntersection();
+    SmartDashboard.putNumber("Line_Intersection_X", intersection[0]);
+    SmartDashboard.putNumber("Line_Intersection_Y", intersection[1]);
+    SmartDashboard.putBoolean("Line_Intersection_Valid", intersection[2] > 0);
+
     // Set limelight pipeline for neural detection and reset tracking
     LimelightHelpers.setPipelineIndex(limelightName, 0);
     selectedAlgae = null;
@@ -162,6 +198,35 @@ public class AlgaeTrackCmd extends Command {
   public void execute() {
     // Process detections and drive toward target if found
     processLimelightDetections();
+    
+    // Update line intersection calculation
+    double[] intersection;
+    try {
+      intersection = calculateLineIntersection();
+    } catch (Exception e) {
+      // Fallback in case the method itself throws an uncaught exception
+      System.out.println("Unexpected error in intersection calculation: " + e.getMessage());
+      intersection = new double[] {0, 0, 0};
+    }
+    
+    SmartDashboard.putNumber("Line_Intersection_X", intersection[0]);
+    SmartDashboard.putNumber("Line_Intersection_Y", intersection[1]);
+    SmartDashboard.putBoolean("Line_Intersection_Valid", intersection[2] > 0);
+    
+    // Check for updated line points from SmartDashboard
+    for (int i = 0; i < 4; i++) {
+      try {
+        double newX = SmartDashboard.getNumber("Line_Point" + i + "_X", linePoints[i*2]);
+        double newY = SmartDashboard.getNumber("Line_Point" + i + "_Y", linePoints[i*2+1]);
+        
+        if (newX != linePoints[i*2] || newY != linePoints[i*2+1]) {
+          linePoints[i*2] = newX;
+          linePoints[i*2+1] = newY;
+        }
+      } catch (Exception e) {
+        System.out.println("Error updating line point " + i + ": " + e.getMessage());
+      }
+    }
     
     if (selectedAlgae != null) {
       // Calculate target point
@@ -193,25 +258,26 @@ public class AlgaeTrackCmd extends Command {
       // Drive robot using calculated velocities with rate limiting applied
       m_swerve.setControl(
         roboDrive
-          // .withVelocityX(-smoothForwardVelocity)
-          .withVelocityX(0.0)
+          .withVelocityX(-smoothForwardVelocity)
+          // .withVelocityX(0.0)
           .withVelocityY(0.0)
-          // .withRotationalRate(smoothRotationVelocity)
-          .withRotationalRate(0)
+          .withRotationalRate(-rotationVelocity)
+          // .withRotationalRate(0)
       );
     } else {
       // If no target, smoothly stop the robot
       double smoothForwardVelocity = forwardLimiter.calculate(0);
-      double smoothRotationVelocity = rotationLimiter.calculate(0);
+      // double smoothRotationVelocity = rotationLimiter.calculate(0);
       
-      if (Math.abs(smoothForwardVelocity) > 0.01 || Math.abs(smoothRotationVelocity) > 0.01) {
+      // if (Math.abs(smoothForwardVelocity) > 0.01 || Math.abs(smoothRotationVelocity) > 0.01) {
+      if (Math.abs(smoothForwardVelocity) > 0.01) {
         m_swerve.setControl(
           roboDrive
-            // .withVelocityX(-smoothForwardVelocity)
-            .withVelocityX(0.0)
+            .withVelocityX(-smoothForwardVelocity)
+            // .withVelocityX(0.0)
             .withVelocityY(0.0)
-            // .withRotationalRate(smoothRotationVelocity)
             .withRotationalRate(0.0)
+            // .withRotationalRate(0.0)
         );
       }
     }
@@ -447,8 +513,8 @@ public class AlgaeTrackCmd extends Command {
     double highestTY = -Double.MAX_VALUE;
     
     for (RawDetection detection : detections) {
-      // Skip if the detection is too high on the screen (top 30%)
-      if (detection.tync < TY_THRESHOLD) {
+      // Skip if the detection is too high on the screen (top 40%)
+      if (detection.tync > TY_THRESHOLD) {
         continue;
       }
       
@@ -469,8 +535,8 @@ public class AlgaeTrackCmd extends Command {
     double closestDistance = Double.MAX_VALUE;
     
     for (RawDetection detection : detections) {
-      // Skip if the detection is too high on the screen (top 30%)
-      if (detection.tync < TY_THRESHOLD) {
+      // Skip if the detection is too high on the screen (top 40%)
+      if (detection.tync > TY_THRESHOLD) {
         continue;
       }
       
@@ -496,8 +562,8 @@ public class AlgaeTrackCmd extends Command {
     double largestArea = -Double.MAX_VALUE;
     
     for (RawDetection detection : detections) {
-      // Skip if the detection is too high on the screen (top 30%)
-      if (detection.tync < TY_THRESHOLD) {
+      // Skip if the detection is too high on the screen (top 40%)
+      if (detection.tync > TY_THRESHOLD) {
         continue;
       }
       
@@ -570,7 +636,6 @@ public class AlgaeTrackCmd extends Command {
   @Override
   public boolean isFinished() {
     // End only when parent commands end it
-    
     return false;
   }
 
@@ -585,50 +650,120 @@ public class AlgaeTrackCmd extends Command {
    * @return The angle to the target in degrees (-1 to 1 range, suitable for PID)
    */
   private double calculateAngleToTarget(double[] targetPoint) {
-    // Target coordinates
-    double targetX = targetPoint[0];
-    double targetY = targetPoint[1];
-    
-    // Use global virtual reference point
-    // This gives more stable angles and prevents extreme values
-    
-    // Calculate the horizontal and vertical differences
-    double deltaX = targetX - VIRTUAL_BOTTOM_X;
-    double deltaY = VIRTUAL_BOTTOM_Y - targetY; // Using the virtual point below the screen
-    
-    // Safety check for division by zero or very small values
-    if (Math.abs(deltaY) < 0.001) {
-      // Avoid division by zero by setting a minimum value
-      deltaY = (deltaY >= 0) ? 0.001 : -0.001;
-    }
-    
-    double angleRadians = 0;
-    double angleDegrees = 0;
-    
     try {
+      // Target coordinates
+      double targetX = targetPoint[0];
+      double targetY = targetPoint[1];
+      
+      // Use global virtual reference point
+      // This gives more stable angles and prevents extreme values
+      
+      // Calculate the horizontal and vertical differences
+      double deltaX = targetX - VIRTUAL_BOTTOM_X;
+      double deltaY = VIRTUAL_BOTTOM_Y - targetY;
+      
+      // Safety check for division by zero or very small values
+      if (Math.abs(deltaY) < 0.001) {
+        // Avoid division by zero by setting a minimum value
+        deltaY = (deltaY >= 0) ? 0.001 : -0.001;
+      }
+      
+      double angleRadians = 0;
+      double angleDegrees = 0;
+      
       // Calculate the angle using arctangent
       angleRadians = Math.atan2(deltaX, deltaY);
-      angleDegrees = Math.toDegrees(angleRadians);
+
+      angleDegrees = 180 + Math.toDegrees(angleRadians);
+      if (angleDegrees > 180)  {
+        angleDegrees = angleDegrees - 360 ;
+      }
+      
+      // Check for NaN or Infinity
+      if (Double.isNaN(angleDegrees) || Double.isInfinite(angleDegrees)) {
+        angleDegrees = (deltaX > 0) ? 45.0 : -45.0; // Default to 45 degrees in the direction of deltaX
+      }
+      
+      // Normalize to [-1, 1] for PID controller
+      double normalizedAngle = angleDegrees / 45.0;
+      normalizedAngle = Math.max(-1.0, Math.min(1.0, normalizedAngle));
+      
+      // Log for debugging
+      SmartDashboard.putNumber("Algae_DeltaX", deltaX);
+      SmartDashboard.putNumber("Algae_DeltaY", deltaY);
+      SmartDashboard.putNumber("Algae_AngleDegrees", angleDegrees);
+      
+      return normalizedAngle;
     } catch (Exception e) {
-      // If any error occurs, default to a safe value
+      // Error handling
       System.out.println("Error in angle calculation: " + e.getMessage());
-      angleDegrees = (deltaX > 0) ? 45.0 : -45.0; // Default to 45 degrees in the direction of deltaX
+      return 0.0; // Default safe value
     }
-    
-    // Check for NaN or Infinity
-    if (Double.isNaN(angleDegrees) || Double.isInfinite(angleDegrees)) {
-      angleDegrees = (deltaX > 0) ? 45.0 : -45.0; // Default to 45 degrees in the direction of deltaX
+  }
+
+  /**
+   * Calculates the intersection point of two lines.
+   * Line 1 is defined by points 0 and 1 in the linePoints array.
+   * Line 2 is defined by points 2 and 3 in the linePoints array.
+   * 
+   * @return An array containing [x, y, valid] where:
+   *   - x, y are the coordinates of the intersection point
+   *   - valid is 1.0 if the lines intersect, 0.0 if they are parallel or an error occurs
+   */
+  private double[] calculateLineIntersection() {
+    try {
+      // Extract points from the array
+      double x1 = linePoints[0];
+      double y1 = linePoints[1];
+      double x2 = linePoints[2];
+      double y2 = linePoints[3];
+      
+      double x3 = linePoints[4];
+      double y3 = linePoints[5];
+      double x4 = linePoints[6];
+      double y4 = linePoints[7];
+      
+      // Calculate the denominator
+      double denominator = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+      
+      // If denominator is 0, lines are parallel or coincident
+      if (Math.abs(denominator) < 1e-10) {
+        return new double[] {0, 0, 0}; // No intersection, return origin and invalid flag
+      }
+      
+      // Calculate the intersection point using the formula for line intersection
+      double ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / denominator;
+      
+      // Calculate intersection coordinates
+      double intersectionX = x1 + ua * (x2 - x1);
+      double intersectionY = y1 + ua * (y2 - y1);
+      
+      // Check for NaN or infinity
+      if (Double.isNaN(intersectionX) || Double.isInfinite(intersectionX) ||
+          Double.isNaN(intersectionY) || Double.isInfinite(intersectionY)) {
+        return new double[] {0, 0, 0}; // Invalid results
+      }
+      
+      return new double[] {intersectionX, intersectionY, 1.0}; // Valid intersection
+    } catch (ArithmeticException | ArrayIndexOutOfBoundsException | NullPointerException e) {
+      // Log error to console
+      System.out.println("Error in calculateLineIntersection: " + e.getMessage());
+      // Return default values in case of any error
+      return new double[] {0, 0, 0};
     }
-    
-    // Normalize to [-1, 1] for PID controller
-    double normalizedAngle = angleDegrees / 90.0;
-    normalizedAngle = Math.max(-1.0, Math.min(1.0, normalizedAngle));
-    
-    // Log for debugging
-    SmartDashboard.putNumber("Algae_DeltaX", deltaX);
-    SmartDashboard.putNumber("Algae_DeltaY", deltaY);
-    SmartDashboard.putNumber("Algae_AngleDegrees", angleDegrees);
-    
-    return normalizedAngle;
+  }
+  
+  /**
+   * Sets new values for the 4 points used in line intersection.
+   * 
+   * @param pointIndex The index of the point (0-3)
+   * @param x The x-coordinate
+   * @param y The y-coordinate
+   */
+  public void setLinePoint(int pointIndex, double x, double y) {
+    if (pointIndex >= 0 && pointIndex < 4) {
+      linePoints[pointIndex * 2] = x;
+      linePoints[pointIndex * 2 + 1] = y;
+    }
   }
 } 
