@@ -110,32 +110,32 @@ public class AlgaeTrackCmd extends Command {
     // Initialize SmartDashboard values
     SmartDashboard.putNumber("Algae_ForwardVelocity", 0);
     SmartDashboard.putNumber("Algae_RotationVelocity", 0);
-    SmartDashboard.putNumber("LL_TX", 0);
-    SmartDashboard.putNumber("LL_TY", 0);
-    SmartDashboard.putNumber("LL_TA", 0);
-    SmartDashboard.putString("LL_DetectorClass", "");
-    SmartDashboard.putNumber("LL_DetectorClassIndex", 0);
-    SmartDashboard.putString("Algae_Algorithm", CURRENT_SELECTION_ALGORITHM.toString());
-    SmartDashboard.putBoolean("Algae_EnableRectCheck", enableRectangularCheck);
-    SmartDashboard.putBoolean("Algae_EnableAreaCheck", enableAreaRatioCheck);
+    // SmartDashboard.putNumber("LL_TX", 0);
+    // SmartDashboard.putNumber("LL_TY", 0);
+    // SmartDashboard.putNumber("LL_TA", 0);
+    // SmartDashboard.putString("LL_DetectorClass", "");
+    // SmartDashboard.putNumber("LL_DetectorClassIndex", 0);
+    // SmartDashboard.putString("Algae_Algorithm", CURRENT_SELECTION_ALGORITHM.toString());
+    // SmartDashboard.putBoolean("Algae_EnableRectCheck", enableRectangularCheck);
+    // SmartDashboard.putBoolean("Algae_EnableAreaCheck", enableAreaRatioCheck);
     SmartDashboard.putNumber("Algae_TargetOffsetX", TARGET_OFFSET_X);
     SmartDashboard.putNumber("Algae_TargetOffsetY", TARGET_OFFSET_Y);
-    SmartDashboard.putNumber("Algae_AreaRatio", 0);
-    SmartDashboard.putNumber("Algae_LeftX", 0);
+    // SmartDashboard.putNumber("Algae_AreaRatio", 0);
+    // SmartDashboard.putNumber("Algae_LeftX", 0);
     SmartDashboard.putNumber("Algae_TargetX", 0);
     SmartDashboard.putNumber("Algae_TargetY", 0);
     SmartDashboard.putNumber("Algae_MappedTX", 0);
     SmartDashboard.putNumber("Algae_MappedTY", 0);
-    SmartDashboard.putBoolean("LL_HasTarget", false);
-    SmartDashboard.putNumber("LL_DetectionCount", 0);
-    SmartDashboard.putNumber("Algae_Selected_ClassID", -1);
+    // SmartDashboard.putBoolean("LL_HasTarget", false);
+    // SmartDashboard.putNumber("LL_DetectionCount", 0);
+    // SmartDashboard.putNumber("Algae_Selected_ClassID", -1);
     SmartDashboard.putNumber("Algae_Selected_TX", 0);
     SmartDashboard.putNumber("Algae_Selected_TY", 0);
-    SmartDashboard.putNumber("Algae_Selected_Area", 0);
+    // SmartDashboard.putNumber("Algae_Selected_Area", 0);
     SmartDashboard.putNumber("Algae_BB_w", 0);
     SmartDashboard.putNumber("Algae_BB_h", 0);
-    SmartDashboard.putNumber("Algae_SmoothForwardVelocity", 0);
-    SmartDashboard.putNumber("Algae_SmoothRotationVelocity", 0);
+    // SmartDashboard.putNumber("Algae_SmoothForwardVelocity", 0);
+    // SmartDashboard.putNumber("Algae_SmoothRotationVelocity", 0);
     SmartDashboard.putNumber("Algae_AngleToTarget", 0);
     SmartDashboard.putNumber("Algae_TY_Threshold", TY_THRESHOLD);
     SmartDashboard.putNumber("Algae_DeltaX", 0);
@@ -220,14 +220,14 @@ public class AlgaeTrackCmd extends Command {
   private void processLimelightDetections() {
     // Get and process vision data, selecting the best target
     boolean hasTarget = LimelightHelpers.getTV(limelightName);
-    SmartDashboard.putBoolean("LL_HasTarget", hasTarget);
+    // SmartDashboard.putBoolean("LL_HasTarget", hasTarget);
     
     if (hasTarget) {
       updateLimelightData();
       RawDetection[] detections = LimelightHelpers.getRawDetections(limelightName);
       
       if (detections != null && detections.length > 0) {
-        SmartDashboard.putNumber("LL_DetectionCount", detections.length);
+        // SmartDashboard.putNumber("LL_DetectionCount", detections.length);
         
         // Select algae based on algorithm
         switch (CURRENT_SELECTION_ALGORITHM) {
@@ -245,11 +245,11 @@ public class AlgaeTrackCmd extends Command {
             break;
         }
       } else {
-        SmartDashboard.putNumber("LL_DetectionCount", 0);
+        // SmartDashboard.putNumber("LL_DetectionCount", 0);
         selectedAlgae = null;
       }
     } else {
-      SmartDashboard.putNumber("LL_DetectionCount", 0);
+      // SmartDashboard.putNumber("LL_DetectionCount", 0);
       selectedAlgae = null;
     }
     
@@ -258,16 +258,16 @@ public class AlgaeTrackCmd extends Command {
   
   private void updateLimelightData() {
     // Update SmartDashboard with basic Limelight data
-    SmartDashboard.putNumber("LL_TX", LimelightHelpers.getTX(limelightName));
-    SmartDashboard.putNumber("LL_TY", LimelightHelpers.getTY(limelightName));
-    SmartDashboard.putNumber("LL_TA", LimelightHelpers.getTA(limelightName));
-    SmartDashboard.putString("LL_DetectorClass", LimelightHelpers.getDetectorClass(limelightName));
-    SmartDashboard.putNumber("LL_DetectorClassIndex", LimelightHelpers.getDetectorClassIndex(limelightName));
+    // SmartDashboard.putNumber("LL_TX", LimelightHelpers.getTX(limelightName));
+    // SmartDashboard.putNumber("LL_TY", LimelightHelpers.getTY(limelightName));
+    // SmartDashboard.putNumber("LL_TA", LimelightHelpers.getTA(limelightName));
+    // SmartDashboard.putString("LL_DetectorClass", LimelightHelpers.getDetectorClass(limelightName));
+    // SmartDashboard.putNumber("LL_DetectorClassIndex", LimelightHelpers.getDetectorClassIndex(limelightName));
     
     // Display algorithm and filter settings
-    SmartDashboard.putString("Algae_Algorithm", CURRENT_SELECTION_ALGORITHM.toString());
-    SmartDashboard.putBoolean("Algae_EnableRectCheck", enableRectangularCheck);
-    SmartDashboard.putBoolean("Algae_EnableAreaCheck", enableAreaRatioCheck);
+    // SmartDashboard.putString("Algae_Algorithm", CURRENT_SELECTION_ALGORITHM.toString());
+    // SmartDashboard.putBoolean("Algae_EnableRectCheck", enableRectangularCheck);
+    // SmartDashboard.putBoolean("Algae_EnableAreaCheck", enableAreaRatioCheck);
     SmartDashboard.putNumber("Algae_TargetOffsetX", TARGET_OFFSET_X);
     SmartDashboard.putNumber("Algae_TargetOffsetY", TARGET_OFFSET_Y);
     SmartDashboard.putNumber("Algae_TY_Threshold", TY_THRESHOLD);
@@ -369,7 +369,7 @@ public class AlgaeTrackCmd extends Command {
     // Calculate and check area ratio
     double objectArea = detection.ta * boxArea;
     double areaRatio = objectArea / boxArea;
-    SmartDashboard.putNumber("Algae_AreaRatio", areaRatio);
+    // SmartDashboard.putNumber("Algae_AreaRatio", areaRatio);
     
     return areaRatio >= MIN_AREA_RATIO;
   }
@@ -521,14 +521,14 @@ public class AlgaeTrackCmd extends Command {
   private void displaySelectedAlgae() {
     // Update dashboard with selected algae information
     if (selectedAlgae != null) {
-      SmartDashboard.putString("Algae_SelectionAlgorithm", CURRENT_SELECTION_ALGORITHM.toString());
-      SmartDashboard.putNumber("Algae_Selected_ClassID", selectedAlgae.classId);
+      // SmartDashboard.putString("Algae_SelectionAlgorithm", CURRENT_SELECTION_ALGORITHM.toString());
+      // SmartDashboard.putNumber("Algae_Selected_ClassID", selectedAlgae.classId);
       SmartDashboard.putNumber("Algae_Selected_TX", selectedAlgae.txnc);
       SmartDashboard.putNumber("Algae_Selected_TY", selectedAlgae.tync);
-      SmartDashboard.putNumber("Algae_Selected_Area", selectedAlgae.ta);
+      // SmartDashboard.putNumber("Algae_Selected_Area", selectedAlgae.ta);
     } else {
-      SmartDashboard.putString("Algae_SelectionAlgorithm", "None");
-      SmartDashboard.putNumber("Algae_Selected_ClassID", -1);
+      // SmartDashboard.putString("Algae_SelectionAlgorithm", "None");
+      // SmartDashboard.putNumber("Algae_Selected_ClassID", -1);
       SmartDashboard.putNumber("Algae_Selected_TX", 0);
       SmartDashboard.putNumber("Algae_Selected_TY", 0);
       SmartDashboard.putNumber("Algae_MappedTX", 0);
