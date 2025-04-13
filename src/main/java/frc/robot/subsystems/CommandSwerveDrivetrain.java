@@ -345,7 +345,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 driveMultiplier = initialDriveMultiplier;
         else driveMultiplier = initialDriveMultiplier/2;
 
-        SmartDashboard.putNumber("PigeonVal", getPigeon2().getRotation2d().getDegrees());
+        //SmartDashboard.putNumber("PigeonVal", getPigeon2().getRotation2d().getDegrees());
         m_field.setRobotPose(getState().Pose);
         SmartDashboard.putData("Field", m_field);
     }
@@ -843,8 +843,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         m_isRightVisionEnabled.setDefaultOption("Yes", true);
         m_isRightVisionEnabled.addOption("No", false);
 
-        SmartDashboard.putData("LeftVisionEnable", m_isLeftVisionEnabled);
-        SmartDashboard.putData("RightVisionEnable", m_isRightVisionEnabled);
+        //SmartDashboard.putData("LeftVisionEnable", m_isLeftVisionEnabled);
+        //SmartDashboard.putData("RightVisionEnable", m_isRightVisionEnabled);
 
     }
 

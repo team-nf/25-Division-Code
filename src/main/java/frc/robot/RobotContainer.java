@@ -26,7 +26,6 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.FunnelSubsystem;
 import frc.robot.subsystems.GripperSubsystem;
 import java.util.Optional;
 import java.util.jar.Attributes.Name;
@@ -62,7 +61,6 @@ public class RobotContainer {
   private final ArmSubsystem m_armSubsystem = new ArmSubsystem();
   private final ElevatorSubsystem m_elevatorSubsystem = new ElevatorSubsystem();
   private final GripperSubsystem m_gripperSubsystem = new GripperSubsystem();
-  private final FunnelSubsystem m_funnelSubsystem = new FunnelSubsystem();
 
   private final MainMechStateMachine m_mainMech = new MainMechStateMachine(m_armSubsystem, m_elevatorSubsystem,
       m_gripperSubsystem);
@@ -274,24 +272,22 @@ public class RobotContainer {
     // m_driverController.button(4).onTrue(m_swerve.setPose(0.5,2.0,0));
 
     m_driverController.leftBumper().and(() -> {return checkIntake(1);})
-        .whileTrue(NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToIntake(1))
-            .andThen(NamedCommands.getCommand("TakeCoralAuto")
-              .andThen(NamedCommands.getCommand("CoralCarry").onlyIf(m_gripperSubsystem::hasCoral))));
+        .whileTrue(autoIntake(1)
+              .andThen(NamedCommands.getCommand("CoralCarry").onlyIf(m_gripperSubsystem::hasCoral)));
 
     m_driverController.leftBumper().and(() -> {return checkIntake(2);})
-        .whileTrue(NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToIntake(2))
-          .andThen(NamedCommands.getCommand("TakeCoralAuto")
-            .andThen(NamedCommands.getCommand("CoralCarry").onlyIf(m_gripperSubsystem::hasCoral))));
+        .whileTrue(autoIntake(2)
+            .andThen(NamedCommands.getCommand("CoralCarry").onlyIf(m_gripperSubsystem::hasCoral)));
             
     m_driverController.leftBumper().and(() -> {return checkIntake(12);})
-        .whileTrue(NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToIntake(12))
-          .andThen(NamedCommands.getCommand("TakeCoralAuto")
-            .andThen(NamedCommands.getCommand("CoralCarry").onlyIf(m_gripperSubsystem::hasCoral))));    
+        .whileTrue(autoIntake(12)
+            .andThen(NamedCommands.getCommand("CoralCarry").onlyIf(m_gripperSubsystem::hasCoral)));    
             
     m_driverController.leftBumper().and(() -> {return checkIntake(13);})
-        .whileTrue(NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToIntake(13))
-          .andThen(NamedCommands.getCommand("TakeCoralAuto")
-            .andThen(NamedCommands.getCommand("CoralCarry").onlyIf(m_gripperSubsystem::hasCoral))));
+        .whileTrue(autoIntake(1)
+            .andThen(NamedCommands.getCommand("CoralCarry").onlyIf(m_gripperSubsystem::hasCoral)));
+
+    m_driverController.leftBumper().onTrue(NamedCommands.getCommand("TakeCoralAuto"));
     // CORAL MODE -->
 
     // 17 - L_34
@@ -883,7 +879,7 @@ public class RobotContainer {
   public Command autoIntake(int id)
   {
     return (NamedCommands.getCommand("CoralIntake").withDeadline(m_swerve.goToIntake(id)))
-                .andThen(NamedCommands.getCommand("TakeCoralAuto"));
+                .andThen(m_swerve.goToIntakeWithPid(id));
   }
 
   public Command autoIntakeForAuto(int id)

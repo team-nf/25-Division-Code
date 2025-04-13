@@ -343,7 +343,7 @@ public class ArmSubsystem extends SubsystemBase {
             goalJ1 = 90;
       
 
-      SmartDashboard.putNumber("Arm/J1-Goal", goalJ1);
+      //SmartDashboard.putNumber("Arm/J1-Goal", goalJ1);
       isJ1GoalReached = (Math.abs(firstJointAngle - goalJ1) < Arm.FirstJoint.kAngleTolerance);
 
 
@@ -359,7 +359,7 @@ public class ArmSubsystem extends SubsystemBase {
         goalJ2 = armJ2limitCW;
       }    
   
-      SmartDashboard.putNumber("Arm/J2-Goal", goalJ2);
+      //SmartDashboard.putNumber("Arm/J2-Goal", goalJ2);
   
       isJ2GoalReached = (Math.abs(secondJointAngle - goalJ2) < Arm.SecondJoint.kAngleTolerance);
   
@@ -381,7 +381,7 @@ public class ArmSubsystem extends SubsystemBase {
       goalJ1 = armJ1limitCW;
     }
 
-    SmartDashboard.putNumber("Arm/J1-Goal", goalJ1);
+    //SmartDashboard.putNumber("Arm/J1-Goal", goalJ1);
     isJ1GoalReached = (Math.abs(firstJointAngle - goalJ1) < Arm.FirstJoint.kAngleTolerance);
 
     m_armFirstJointMotor.setControl(m_firstJointMotionMagic.withPosition(Units.degreesToRotations(goalJ1)
@@ -399,8 +399,8 @@ public class ArmSubsystem extends SubsystemBase {
       goalJ2 = armJ2limitCW;
     }    
 
-    SmartDashboard.putNumber("Arm/J2-Goal", goalJ2);
-    SmartDashboard.putNumber("Arm/J2-Err", error);
+    //SmartDashboard.putNumber("Arm/J2-Goal", goalJ2);
+    //SmartDashboard.putNumber("Arm/J2-Err", error);
 
     isJ2GoalReached = (Math.abs(secondJointAngle - goalJ2) < Arm.SecondJoint.kAngleTolerance);
 
