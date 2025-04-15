@@ -55,7 +55,7 @@ public class AlgaeTrackCmd extends Command {
   private static final double kForwardD = 0.0;
   private static final double kForwardI = 0.0;
 
-  private static final double kRotationP = 0.9;
+  private static final double kRotationP = 1.2;
   private static final double kRotationD = 0.0;
   private static final double kRotationI = 0.0;
 
@@ -81,7 +81,7 @@ public class AlgaeTrackCmd extends Command {
   
   // Virtual screen points for angle calculation
   private static final double VIRTUAL_BOTTOM_X = 0.0; // Default center X is 0 in angular coordinates
-  private static final double VIRTUAL_BOTTOM_Y = -50.0; // Default point below the screen
+  private static final double VIRTUAL_BOTTOM_Y = -180.0; // Default point below the screen
 
   // PID controllers
   private final PIDController rotationPID;
