@@ -23,7 +23,6 @@ import frc.robot.commands.L4Cmd;
 import frc.robot.commands.L4PreCmd;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.ArmSubsystem;
-import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GripperSubsystem;
@@ -62,7 +61,6 @@ public class RobotContainer {
   private final ElevatorSubsystem m_elevatorSubsystem = new ElevatorSubsystem();
   private final GripperSubsystem m_gripperSubsystem = new GripperSubsystem();
   // private final FunnelSubsystem m_funnelSubsystem = new FunnelSubsystem();
-  private final ClimbSubsystem m_climbSubsystem = new ClimbSubsystem();
   
   private final MainMechStateMachine m_mainMech = new MainMechStateMachine(m_armSubsystem, m_elevatorSubsystem,
       m_gripperSubsystem);
