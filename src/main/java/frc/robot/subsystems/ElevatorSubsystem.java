@@ -19,6 +19,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 
 import edu.wpi.first.wpilibj.RobotState;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -43,6 +44,9 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   private boolean isGoalReached = false;
   private boolean isMotorsSet = false;
+
+  private final SendableChooser<Integer> m_offsetChooser = new SendableChooser<>();
+  private double eleOffset = 0;
 
 
   /** Creates a new ElevatorSubsytem. */
@@ -81,7 +85,32 @@ public class ElevatorSubsystem extends SubsystemBase {
     m_slaveMotor.setPosition(0);
 
     m_slaveMotor.setControl(new Follower(m_motor.getDeviceID(), false));
+
+    m_offsetChooser.setDefaultOption("0", 0);
+    m_offsetChooser.addOption("1", 1);
+    m_offsetChooser.addOption("2", 2);
+    m_offsetChooser.addOption("3", 3);
+    m_offsetChooser.addOption("4", 4);
+    m_offsetChooser.addOption("5", 5);
+    m_offsetChooser.addOption("6", 6);
+    m_offsetChooser.addOption("7", 7);
+    m_offsetChooser.addOption("8", 8);
+    m_offsetChooser.addOption("9", 9);
+    m_offsetChooser.addOption("10", 10);
+    m_offsetChooser.addOption("-1", -1);
+    m_offsetChooser.addOption("-2", -2);
+    m_offsetChooser.addOption("-3", -3);
+    m_offsetChooser.addOption("-4", -4);
+    m_offsetChooser.addOption("-5", -5);
+    m_offsetChooser.addOption("-6", -6);
+    m_offsetChooser.addOption("-7", -7);
+    m_offsetChooser.addOption("-8", -8);
+    m_offsetChooser.addOption("-9", -9);
+    m_offsetChooser.addOption("-10", -10);
+    SmartDashboard.putData("EleOffsetChooser", m_offsetChooser);
+    SmartDashboard.setPersistent("EleOffsetChooser");
     }
+    
 
   @Override
   public void periodic() {
@@ -89,7 +118,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     elevatorHeight = getEncoderDistance();
     SmartDashboard.putNumber("Elevator/ElevatorHeight", elevatorHeight);
     SmartDashboard.putBoolean("Elevator/EleGoalReached", isGoalReached);
-    SmartDashboard.putBoolean("Arm/isArmReady", elevatorHeight > Elevator.kReadyPos);
     if (RobotState.isTest()) m_motor.setControl(m_neutral);
     else if (RobotState.isDisabled()) m_motor.setControl(m_brake);
 
@@ -101,6 +129,13 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
     else isMotorsSet = true;
     }
+
+    if (m_offsetChooser != null) {
+      eleOffset = m_offsetChooser.getSelected()*2; 
+    } else eleOffset = 0;
+    if (eleOffset < 20) eleOffset = 20;
+    else if (eleOffset > -20) eleOffset = -20;
+    else eleOffset = 0;
   }
 
   public void reachGoal(double goal) {
@@ -108,6 +143,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     if(goal < Elevator.kMinElevatorHeightMeters) goal = Elevator.kMinElevatorHeightMeters;
     else if(goal > Elevator.kMaxElevatorHeightMeters) goal = Elevator.kMaxElevatorHeightMeters;
     //if(getElevatorHeight() > 0.6 && goal < 0.6) goal = 0.5;
+
+    goal += eleOffset;
     m_motor.setControl(m_motionMagic.withPosition(goal / (Elevator.kElevatorDrumRadius * 2 * Math.PI / Elevator.kElevatorGearing)));
     isGoalReached = (Math.abs(getElevatorHeight() - goal) < Elevator.kElevatorTolerance);
   }

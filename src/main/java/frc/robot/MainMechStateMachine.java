@@ -86,7 +86,7 @@ public class MainMechStateMachine {
 
         if (m_gripperSubsystem.hasAlgae()) {
             if (!algaeStateList.contains(state)) {
-                state = lastState;
+                state = "AlgaeCarry";
             }
         }
 

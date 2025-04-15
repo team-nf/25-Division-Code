@@ -314,6 +314,10 @@ public class RobotContainer {
     m_driverController.b().and(() -> {
       return (!isAlgaeSelected) && !isL34Selected && checkReef(1, true);})
       .whileTrue(autoReefPoseS1R(17));
+
+    m_driverController.leftTrigger().and(() -> {
+      return (!isAlgaeSelected) && checkReef(1, true);})
+        .whileTrue(m_swerve.goToTagSafe(17).alongWith(NamedCommands.getCommand("FullyClosed")));
     //---------
 
     // 18 - L_34
@@ -342,6 +346,11 @@ public class RobotContainer {
     m_driverController.b().and(() -> {
         return (!isAlgaeSelected) && !isL34Selected && checkReef(2, true);})
         .whileTrue(autoReefPoseS1R(18));
+
+    m_driverController.leftTrigger().and(() -> {
+      return (!isAlgaeSelected) && checkReef(2, true);})
+      .whileTrue(m_swerve.goToTagSafe(18).alongWith(NamedCommands.getCommand("FullyClosed")));
+
     //---------
 
     // 19 - L_34
@@ -370,6 +379,10 @@ public class RobotContainer {
     m_driverController.b().and(() -> {
         return (!isAlgaeSelected) && !isL34Selected && checkReef(3, true);})
         .whileTrue(autoReefPoseS1R(19));
+
+    m_driverController.leftTrigger().and(() -> {
+      return (!isAlgaeSelected) && checkReef(3, true);})
+      .whileTrue(m_swerve.goToTagSafe(19).alongWith(NamedCommands.getCommand("FullyClosed")));
     //---------
 
     // 20 - L_34
@@ -398,6 +411,10 @@ public class RobotContainer {
     m_driverController.b().and(() -> {
         return (!isAlgaeSelected) && !isL34Selected && checkReef(4, true);})
         .whileTrue(autoReefPoseS1R(20));
+
+    m_driverController.leftTrigger().and(() -> {
+      return (!isAlgaeSelected) && checkReef(4, true);})
+      .whileTrue(m_swerve.goToTagSafe(20).alongWith(NamedCommands.getCommand("FullyClosed")));
     //---------
 
     // 21 - L_34
@@ -426,6 +443,10 @@ public class RobotContainer {
     m_driverController.b().and(() -> {
       return (!isAlgaeSelected) && !isL34Selected && checkReef(5, true);})
       .whileTrue(autoReefPoseS1R(21));
+
+    m_driverController.leftTrigger().and(() -> {
+      return (!isAlgaeSelected) && checkReef(5, true);})
+      .whileTrue(m_swerve.goToTagSafe(21).alongWith(NamedCommands.getCommand("FullyClosed")));
     //---------
 
     // 22 - L_34
@@ -454,6 +475,10 @@ public class RobotContainer {
     m_driverController.b().and(() -> {
       return (!isAlgaeSelected) && !isL34Selected && checkReef(6, true);})
       .whileTrue(autoReefPoseS1R(22));
+
+    m_driverController.leftTrigger().and(() -> {
+      return (!isAlgaeSelected) && checkReef(6, true);})
+      .whileTrue(m_swerve.goToTagSafe(22).alongWith(NamedCommands.getCommand("FullyClosed")));
     //---------
 
     // 8 - L_34
@@ -626,14 +651,11 @@ public class RobotContainer {
 
     // CORAL MODE <--> ALGAE MODE
 
-    m_driverController.a().and(() -> {return isAlgaeSelected;}).whileTrue(NamedCommands.getCommand("AlgaeGround"));
-    m_driverController.a().and(m_mainMech::isAlgaeGround)
-          .whileTrue(NamedCommands.getCommand("AlgaeTrack")
-                     .until(m_gripperSubsystem::hasAlgae));
+    m_driverController.a().and(() -> {return isAlgaeSelected;}).and(() -> {return !m_gripperSubsystem.hasAlgae();})
+              .whileTrue(NamedCommands.getCommand("AlgaeGround"));
     m_driverController.a().and(m_mainMech::isAlgaeGround).onTrue(m_gripperSubsystem.takeAlgae());
     m_driverController.a().and(m_mainMech::isAlgaeGround).and(m_gripperSubsystem::hasAlgae)
-                          .onTrue(NamedCommands.getCommand("AlgaeCarry")
-                                  .alongWith(m_swerve.getOut()));
+                          .whileTrue(NamedCommands.getCommand("AlgaeGround").alongWith(m_swerve.getOut()));
     
 
     m_driverController.b().and(() -> {return isAlgaeSelected;}).whileTrue(NamedCommands.getCommand("AlgaeCarry"));
@@ -642,12 +664,12 @@ public class RobotContainer {
       return isAlgaeSelected;
     }).and(() -> {
       return checkTeam(true);
-    }).whileTrue(m_swerve.goToBlueNet());
+    }).whileTrue(m_swerve.goToBlueNet().alongWith(NamedCommands.getCommand("FullyClosed")));
     m_driverController.x().and(() -> {
       return isAlgaeSelected;
     }).and(() -> {
       return checkTeam(false);
-    }).whileTrue(m_swerve.goToRedNet());
+    }).whileTrue(m_swerve.goToRedNet().alongWith(NamedCommands.getCommand("FullyClosed")));
 
     m_driverController.rightTrigger().and(() -> {
       return isAlgaeSelected;

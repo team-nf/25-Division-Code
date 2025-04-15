@@ -60,7 +60,7 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
-    m_robotContainer.eleReadyCmd().schedule();
+    // m_robotContainer.eleReadyCmd().schedule();
   }
 
   @Override

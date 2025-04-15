@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 import frc.robot.Constants.Arm;
+import frc.robot.Constants.Elevator;
 import frc.robot.custom.ArmHalfEncoder;
 import frc.robot.custom.ArmHalfEncoderSim;
 
@@ -102,7 +103,7 @@ public class ArmSubsystem extends SubsystemBase {
   private double armJ2limitCCW = Arm.SecondJoint.kMaxAngle;
   private double armJ2limitCW = Arm.SecondJoint.kMinAngle;
   
-  private boolean isArmReady = false;
+  private boolean isArmReady = true;
   private double armJ1LastAngle = -1;
   private double armJ2LastAngle = -1;
 
@@ -220,8 +221,6 @@ public class ArmSubsystem extends SubsystemBase {
       secondJointAngle = m_secondJointHalfcoder.getAngle() - (firstJointAngle-180)*Arm.SecondJoint.kPulleyErrorRatio;
     }
 
-    isArmReady = SmartDashboard.getBoolean("Arm/isArmReady", false);
-
     SmartDashboard.putBoolean("Arm/J1-isReached", isJ1GoalReached);
     SmartDashboard.putBoolean("Arm/J2-isReached", isJ2GoalReached);
     SmartDashboard.putNumber("Arm/J1LastAngle", armJ1LastAngle);
@@ -248,16 +247,16 @@ public class ArmSubsystem extends SubsystemBase {
     else isMotorsSet = true;
     }
 
-    if (m_offsetChooser.getSelected() < 10 && m_offsetChooser.getSelected() > -10) {
-      if (m_offsetChooser != null) {
-        j2Offset = m_offsetChooser.getSelected()*3; 
-      } else j2Offset = 0;
-    } else {
-    if (m_offsetChooser.getSelected() > 10) j2Offset = 60;
-    if (m_offsetChooser.getSelected() < -10) j2Offset = -60;
-    }
+
+    if (m_offsetChooser != null) {
+      j2Offset = m_offsetChooser.getSelected()*3; 
+    } else j2Offset = 0;
+    if (j2Offset < 30) j2Offset = 30;
+    else if (j2Offset > -30) j2Offset = -30;
+    else j2Offset = 0;
 
 
+    SmartDashboard.putBoolean("Arm/isArmReady", isInitialReady);
 
   }
 
@@ -324,9 +323,16 @@ public class ArmSubsystem extends SubsystemBase {
 
   public void reachGoal(double goalJ1, double goalJ2) 
   {
-    if(isArmReady && !isInitialReady && SmartDashboard.getNumber("Arm/J2/M-StartPos", 0) > 100 && 
-    SmartDashboard.getNumber("Arm/J1/M-StartPos", 0) > 140) 
-            isInitialReady = true;
+    if(isArmReady && !isInitialReady)
+    {
+      double j1Mpos = SmartDashboard.getNumber("Arm/J2/M-StartPos", 0);
+      double j2Mpos = SmartDashboard.getNumber("Arm/J1/M-StartPos", 0);
+
+      if(j1Mpos > 90 && j1Mpos < 270 && j2Mpos > 90 && j2Mpos < 270) 
+      {
+        isInitialReady = true;
+      }
+    } 
 
     if(isInitialReady)
     {
@@ -346,6 +352,7 @@ public class ArmSubsystem extends SubsystemBase {
       //SmartDashboard.putNumber("Arm/J1-Goal", goalJ1);
       isJ1GoalReached = (Math.abs(firstJointAngle - goalJ1) < Arm.FirstJoint.kAngleTolerance);
 
+      if(firstJointAngle < 30) isInitialReady = false;
 
       m_armFirstJointMotor.setControl(m_firstJointMotionMagic.withPosition(Units.degreesToRotations(goalJ1)
       *Arm.FirstJoint.kArmReduction));

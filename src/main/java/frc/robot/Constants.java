@@ -263,11 +263,10 @@ public final class Constants {
     public static final double[] algae3Pos      = {2.9,4.1,0};
     public static final double[] algae2Pos      = {2.9,4.15,0};
     public static final double[] takeAlgaePos   = {3.15,4.15,0};
-    public static final double[] checkTagPos18R = {2.75,3.95,0};
-    public static final double[] checkTagPos18L = {2.75,4.25,0};
+    public static final double[] checkTagPos18R = {2.7,3.95,0};
+    public static final double[] checkTagPos18L = {2.7,4.25,0};
     public static final double[] checkTagPos18  = {2.5,4.1,0};
-
-
+    public static final double[] safeTagPos18   = {2.3,4.1,0};
 
     public static final double[] algaeNetPos14       = {1.5,6,0};
     public static final double[] algaeProcessorPos16 = {2.98,4,0};
@@ -284,6 +283,7 @@ public final class Constants {
     public static final Pose2d checkTagRPose2D = new Pose2d(checkTagPos18R[0], checkTagPos18R[1], Rotation2d.fromDegrees(checkTagPos18R[2]));
     public static final Pose2d checkTagLPose2D = new Pose2d(checkTagPos18L[0], checkTagPos18L[1], Rotation2d.fromDegrees(checkTagPos18L[2]));
     public static final Pose2d checkTagPose2D  = new Pose2d(checkTagPos18[0], checkTagPos18[1], Rotation2d.fromDegrees(checkTagPos18[2]));
+    public static final Pose2d safeTagPose2D  = new Pose2d(safeTagPos18[0], safeTagPos18[1], Rotation2d.fromDegrees(safeTagPos18[2]));
 
     public static final Pose2d algaeNet14Pose2D       = new Pose2d(algaeNetPos14[0], algaeNetPos14[1], Rotation2d.fromDegrees(algaeNetPos14[2]));
     public static final Pose2d algaeProcessor16Pose2D = new Pose2d(algaeProcessorPos16[0], algaeProcessorPos16[1], Rotation2d.fromDegrees(algaeProcessorPos16[2]));
@@ -320,6 +320,7 @@ public final class Constants {
     public static final Transform2d RobotPosByTagR = new Transform2d(TAG18_POSE2D, checkTagRPose2D);
     public static final Transform2d RobotPosByTagL = new Transform2d(TAG18_POSE2D, checkTagLPose2D);
     public static final Transform2d RobotPosByTag = new Transform2d(TAG18_POSE2D, checkTagPose2D);
+    public static final Transform2d RobotPosByTagSafe = new Transform2d(TAG18_POSE2D, safeTagPose2D);
     public static final Transform2d ReefPosS4RByTag =  new Transform2d(TAG18_POSE2D, stage4RPose2D);
     public static final Transform2d ReefPosS3RByTag =  new Transform2d(TAG18_POSE2D, stage3RPose2D);
     public static final Transform2d ReefPosS4LByTag =  new Transform2d(TAG18_POSE2D, stage4LPose2D);
