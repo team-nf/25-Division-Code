@@ -222,7 +222,9 @@ public final class Constants {
   {
     // Length, Angle 1, Angle 2
     
-    public static final double angleOffset = -7;
+    public static final double eleOffset = 0;
+    public static final double j1Offset = 0;
+    public static final double j2Offset = 0;
 
     public static final double[] CoralIntake = {0.03, 211, 105};    //Coral Intake 217.5 110
 

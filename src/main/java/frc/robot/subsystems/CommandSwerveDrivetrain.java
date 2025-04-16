@@ -864,4 +864,20 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     {
         this.setControl(roboDrive.withVelocityX(0).withVelocityY(0));
     }
+
+    public void setDriveMultiplier(double multiplier)
+    {
+        driveMultiplier = multiplier;
+    }
+
+    public void setLimelightLightOn(String limelightName, int power)
+    {
+        LimelightHelpers.setLEDMode_ForceOn(limelightName);
+    }
+
+    
+    public void setLimelightLightOff(String limelightName, int power)
+    {
+        LimelightHelpers.setLEDMode_ForceOff(limelightName);
+    }
 }
