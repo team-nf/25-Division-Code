@@ -11,6 +11,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.networktables.BooleanEntry;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -40,20 +41,53 @@ public class GripperSubsystem extends SubsystemBase {
 
   private boolean isCoralStuck = false;
 
+  private final SendableChooser<Boolean> m_sensorUseSelect  = new SendableChooser<>();
+  private final SendableChooser<Boolean> m_hasAlgaeManual       = new SendableChooser<>();
+  private final SendableChooser<Boolean> m_hasCoralManual       = new SendableChooser<>();
+
+  private boolean manualSensorUsage = false;
+  private boolean hasAlgaeManual = false;
+  private boolean hasCoralManual = false;
+
   /** 
    * Creates a new GripperSubsystem. 
    * Valla tuna ercan senden kopyaladım.
    */
   public GripperSubsystem() {
+    
+    m_sensorUseSelect.setDefaultOption("Real", false);
+    m_sensorUseSelect.addOption("Manual", true);
+    m_sensorUseSelect.onChange(this::setManualSensorUsage);
 
-  
-    // Initialize telemetry
+    m_hasAlgaeManual.setDefaultOption("Yes", true);
+    m_hasAlgaeManual.addOption("No", false);
+    m_hasAlgaeManual.onChange(this::setHasAlgaeManual);
+
+    m_hasCoralManual.setDefaultOption("Yes", true);
+    m_hasCoralManual.addOption("No", false);
+    m_hasCoralManual.onChange(this::setHasCoralManual);
+
 
   }
 
-  public boolean hasAlgae() {return this.hasAlgae;}
+  private void setManualSensorUsage(boolean m)
+  {
+    manualSensorUsage = m;
+  }
 
-  public boolean hasCoral() {return this.hasCoral;}
+  public void setHasAlgaeManual(boolean m)
+  {
+    hasAlgaeManual = m;
+  }
+
+  public void setHasCoralManual(boolean m)
+  {
+    hasCoralManual = m;
+  }
+
+  public boolean hasAlgae() {return (!manualSensorUsage ? this.hasAlgae : hasAlgaeManual);}
+
+  public boolean hasCoral(){return (!manualSensorUsage ? this.hasCoral : hasCoralManual);}
 
   public boolean hasNotCoral() {return !this.hasCoral;}
 

@@ -920,7 +920,7 @@ public class RobotContainer {
 
   public void containerPeriodic() {
     putSelectedReefID();
-    changeAlgaModeFunction();
+    changeAlgaeModeFunction();
     algaeModeLLControl();
     m_mainMech.periodic();
   }
@@ -1062,14 +1062,14 @@ public boolean isAutoThrow()
   return reefAutoThrow || DriverStation.isAutonomous();
 }
 
-public void changeAlgaModeFunction()
+public void changeAlgaeModeFunction()
 {
-  if(m_driverController.rightTrigger().getAsBoolean() && !algaeChangeFlag) 
+  if(m_driverController.rightTrigger(0.5).getAsBoolean() && !algaeChangeFlag) 
   {
     algaeChangeFlag = true;
     isAlgaeSelected = !isAlgaeSelected;
   }
-  if(!m_driverController.rightTrigger().getAsBoolean() && algaeChangeFlag) algaeChangeFlag = false;
+  if(!m_driverController.rightTrigger(0.5).getAsBoolean() && algaeChangeFlag) algaeChangeFlag = false;
 }
 
 public void algaeModeLLControl()
