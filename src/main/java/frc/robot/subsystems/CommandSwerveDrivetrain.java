@@ -845,7 +845,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public Command getOut()
     {
-        return run(() -> setControl(roboDrive.withVelocityX(-0.8))).withTimeout(0.5);
+        return run(() -> setControl(roboDrive.withVelocityX(-0.8))).withTimeout(0.4);
     }
 
     public void initializeSomeStuff()
@@ -870,13 +870,13 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         driveMultiplier = multiplier;
     }
 
-    public void setLimelightLightOn(String limelightName, int power)
+    public void setLimelightLightOn(String limelightName)
     {
         LimelightHelpers.setLEDMode_ForceOn(limelightName);
     }
 
     
-    public void setLimelightLightOff(String limelightName, int power)
+    public void setLimelightLightOff(String limelightName)
     {
         LimelightHelpers.setLEDMode_ForceOff(limelightName);
     }

@@ -40,6 +40,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
@@ -102,6 +103,8 @@ public class RobotContainer {
   private double selectedReefID = -1;
   private boolean reefAutoThrow = true;
   private int selectedIntake = 1;
+
+  private boolean algaeChangeFlag = false;
 
   private SlewRateLimiter d1Filter = new SlewRateLimiter(2.8);
   private SlewRateLimiter d2Filter = new SlewRateLimiter(2.8);
@@ -238,6 +241,8 @@ public class RobotContainer {
 
     m_operatorController.L3().whileTrue(NamedCommands.getCommand("CoralCarry"));
     m_operatorController.R3().whileTrue(NamedCommands.getCommand("AlgaeCarry"));
+
+    // -------
 
 
     m_driverController.rightBumper()
@@ -915,6 +920,8 @@ public class RobotContainer {
 
   public void containerPeriodic() {
     putSelectedReefID();
+    changeAlgaModeFunction();
+    algaeModeLLControl();
     m_mainMech.periodic();
   }
 
@@ -1053,6 +1060,30 @@ public void changeToCoralMode()
 public boolean isAutoThrow()
 {
   return reefAutoThrow || DriverStation.isAutonomous();
+}
+
+public void changeAlgaModeFunction()
+{
+  if(m_driverController.rightTrigger().getAsBoolean() && !algaeChangeFlag) 
+  {
+    algaeChangeFlag = true;
+    isAlgaeSelected = !isAlgaeSelected;
+  }
+  if(!m_driverController.rightTrigger().getAsBoolean() && algaeChangeFlag) algaeChangeFlag = false;
+}
+
+public void algaeModeLLControl()
+{
+  if(isAlgaeSelected)
+  {
+    m_swerve.setLimelightLightOn("limelight-r"); 
+    m_swerve.setLimelightLightOn("limelight-l"); 
+  }
+  else
+  {
+    m_swerve.setLimelightLightOff("limelight-r"); 
+    m_swerve.setLimelightLightOff("limelight-l"); 
+  }
 }
 
 
