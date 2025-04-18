@@ -1018,39 +1018,61 @@ public class RobotContainer {
   public Command getAutonomousCommandBlue() {
     // An example command will be run in autonomous
     return m_swerve.setPoseBlueAuto()
-        .andThen(autoReefPoseS4R(20))
+        .andThen(autoReefPoseS4R(20).withTimeout(7))
         .andThen(autoIntakeForAuto(13))
-        .andThen(autoReefPoseS4L(19))
+        .andThen(autoReefPoseS4L(19).withTimeout(7))
         .andThen(autoIntakeForAuto(13))
-        .andThen(autoReefPoseS4R(19))
+        .andThen(autoReefPoseS4R(19).withTimeout(7))
         .andThen(autoIntake(13));
   }
 
   public Command getAutonomousCommandBlue_2() {
     // An example command will be run in autonomous
     return m_swerve.setPoseBlueAuto_2()
-        .andThen(autoReefPoseS4R(21))
+        .andThen(autoReefPoseS4R(21).withTimeout(7))
         .andThen(m_swerve.goToTagAuto(21).andThen(NamedCommands.getCommand("FullyClosed")));
   
+  }
+
+  public Command getAutonomousCommandBlue_3() {
+    // An example command will be run in autonomous
+    return m_swerve.setPoseBlueAuto_3()
+        .andThen(autoReefPoseS4R(22).withTimeout(7))
+        .andThen(autoIntakeForAuto(12))
+        .andThen(autoReefPoseS4L(17).withTimeout(7))
+        .andThen(autoIntakeForAuto(12))
+        .andThen(autoReefPoseS4R(17).withTimeout(7))
+        .andThen(autoIntake(12));
   }
 
 public Command getAutonomousCommandRed_1() {
   // An example command will be run in autonomous
   return m_swerve.setPoseRedAuto()
-      .andThen(autoReefPoseS4R(11))
+      .andThen(autoReefPoseS4R(11).withTimeout(7))
       .andThen(autoIntakeForAuto(1))
-      .andThen(autoReefPoseS4L(6))
+      .andThen(autoReefPoseS4L(6).withTimeout(7))
       .andThen(autoIntakeForAuto(1))
-      .andThen(autoReefPoseS4R(6))
+      .andThen(autoReefPoseS4R(6).withTimeout(7))
       .andThen(autoIntake(1));
 }
 
 public Command getAutonomousCommandRed_2() {
   // An example command will be run in autonomous
   return m_swerve.setPoseRedAuto_2()
-      .andThen(autoReefPoseS4R(10))
+      .andThen(autoReefPoseS4R(10).withTimeout(7))
       .andThen(m_swerve.goToTagAuto(10).andThen(NamedCommands.getCommand("FullyClosed")));
 
+}
+
+public Command getAutonomousCommandRed_3() {
+  // An example command will be run in autonomous
+  return m_swerve.setPoseRedAuto_3()
+      .andThen(autoReefPoseS4R(9).withTimeout(7))
+      .andThen(autoIntakeForAuto(2))
+      .andThen(autoReefPoseS4L(8).withTimeout(7))
+      .andThen(autoIntakeForAuto(2))
+      .andThen(autoReefPoseS4R(8).withTimeout(7))
+      .andThen(autoIntake(2));
 }
 
 public Command getAutonomousCommand() {

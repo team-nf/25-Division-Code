@@ -221,7 +221,7 @@ public final class Constants {
     public static final double kClimbkV = 0.0; // volt per velocity (V/(m/s))
     public static final double kClimbkA = 0.0; // volt per acceleration (V/(m/s²))
 
-    public static final double kClimbMMCV = 200; //12V sınır koyunca maximum 90 cıvarına çıktı zaten velocity
+    public static final double kClimbMMCV = 100; //12V sınır koyunca maximum 90 cıvarına çıktı zaten velocity
     //+bence iki kat daha hızlı olabilir ama mümkün görünmüyor iyi bir sınır olmalı
     public static final double kClimbMMA = 50;
     public static final double kClimbMMJ = 0; // kullanmıyoruz
@@ -261,8 +261,7 @@ public final class Constants {
     public static final double[] CoralStage4Pre = {1.45, 160, 152};    //Coral Stage 4
     public static final double[] CoralCarry = {0.025, 180, 160};    //Coral Carry
 
-
-    public static final double[] AlgaeThrowNet = {1.6, 175, 220};    //Algae Shoot
+    public static final double[] AlgaeThrowNet = {1.6, 175, 240};    //Algae Shoot
     public static final double[] AlgaeRecoverNet = {1.38, 190, 170};    //Algae Recover After Net
     public static final double[] AlgaeThrowProcessor = {0.02, 90, 280};    //Algae Shoot
 

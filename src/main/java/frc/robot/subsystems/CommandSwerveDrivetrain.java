@@ -58,6 +58,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.PathConstants;
@@ -98,7 +99,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     private final Field2d m_field = new Field2d();
 
-    private final double initialDriveMultiplier = 0.7;
+    private final double initialDriveMultiplier = 0.8;
     private double driveMultiplier = initialDriveMultiplier;
 
     private final Pose2d blueNetPose2d = new Pose2d(7.85, 6.5, new Rotation2d(Units.degreesToRadians(0)));
@@ -330,7 +331,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
 
-        if (Robot.isReal() && RobotState.isTeleop() && RobotState.isEnabled())
+        if (Robot.isReal() && RobotState.isAutonomous() && getState().Pose.getX() > 0.1 && getState().Pose.getY() > 0.1)
         {
             if(isRightVisionEnabled)
             {            
@@ -343,7 +344,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             }
             //updateOdometryWithLL_mt1();
         }
-        else if (Robot.isReal() && RobotState.isAutonomous() && RobotState.isEnabled())
+
+        if (Robot.isReal() && RobotState.isTeleop() )
         {
             if(isRightVisionEnabled)
             {            
@@ -356,6 +358,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             }
             //updateOdometryWithLL_mt1();
         }
+
 
         SmartDashboard.putBoolean("isAllyBlue", DriverStation.getAlliance().get() == Alliance.Blue);
 
@@ -806,22 +809,32 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     public Command setPoseBlueAuto()
     {
-        return runOnce(() -> resetPose(new Pose2d(7.12, 7.55, new Rotation2d(Units.degreesToRadians(-90)))));
+        return runOnce(() -> resetPose(new Pose2d(7.12, 7.55, new Rotation2d(Units.degreesToRadians(-90))))).andThen(new WaitCommand(0.5));
     }
 
     public Command setPoseBlueAuto_2()
     {
-        return runOnce(() -> resetPose(new Pose2d(7.12, 4, new Rotation2d(Units.degreesToRadians(180)))));
+        return runOnce(() -> resetPose(new Pose2d(7.12, 4, new Rotation2d(Units.degreesToRadians(180))))).andThen(new WaitCommand(0.5));
+    }
+
+    public Command setPoseBlueAuto_3()
+    {
+        return runOnce(() -> resetPose(new Pose2d(7.12, 0.45, new Rotation2d(Units.degreesToRadians(-90))))).andThen(new WaitCommand(0.5));
     }
 
     public Command setPoseRedAuto()
     {
-        return runOnce(() -> resetPose(new Pose2d(10.4, 0.45, new Rotation2d(Units.degreesToRadians(90)))));
+        return runOnce(() -> resetPose(new Pose2d(10.4, 0.45, new Rotation2d(Units.degreesToRadians(90))))).andThen(new WaitCommand(0.5));
     }
 
     public Command setPoseRedAuto_2()
     {
-        return runOnce(() -> resetPose(new Pose2d(10.4, 4, new Rotation2d(Units.degreesToRadians(0)))));
+        return runOnce(() -> resetPose(new Pose2d(10.4, 4, new Rotation2d(Units.degreesToRadians(0))))).andThen(new WaitCommand(0.5));
+    }
+
+    public Command setPoseRedAuto_3()
+    {
+        return runOnce(() -> resetPose(new Pose2d(10.4, 7.55, new Rotation2d(Units.degreesToRadians(90))))).andThen(new WaitCommand(0.5));
     }
 
     public Command setPose(double x, double y, double theta)
