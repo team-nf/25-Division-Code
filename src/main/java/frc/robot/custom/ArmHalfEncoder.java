@@ -7,6 +7,7 @@ package frc.robot.custom;
 import javax.print.attribute.standard.PrinterInfo;
 
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.RobotState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 
@@ -49,8 +50,11 @@ public class ArmHalfEncoder {
     public void periodic()
     {
         calcAngle();
-        SmartDashboard.putNumber("Arm/HalfEncoder-" + Double.toString(theId + 1), jointAngle);
-        SmartDashboard.putNumber("Arm/HalfRawEncoder-" + Double.toString(theId + 1), getRawEncoder());
+        if(RobotState.isTest())
+        {
+            SmartDashboard.putNumber("Arm/HalfEncoder-" + Double.toString(theId + 1), jointAngle);
+            SmartDashboard.putNumber("Arm/HalfRawEncoder-" + Double.toString(theId + 1), getRawEncoder());
+        }
 
     }
 

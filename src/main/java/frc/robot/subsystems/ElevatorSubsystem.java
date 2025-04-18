@@ -107,10 +107,20 @@ public class ElevatorSubsystem extends SubsystemBase {
     m_offsetChooser.addOption("-8", -8);
     m_offsetChooser.addOption("-9", -9);
     m_offsetChooser.addOption("-10", -10);
+    m_offsetChooser.onChange(this::offsetListener);
     SmartDashboard.putData("EleOffsetChooser", m_offsetChooser);
     SmartDashboard.setPersistent("EleOffsetChooser");
     }
     
+    public void offsetListener(double selected)
+  {
+    if (m_offsetChooser != null) {
+      eleOffset = selected*0.02; 
+    } else eleOffset = 0;
+    if (eleOffset > 0.2) eleOffset = 0.2;
+    else if (eleOffset < -0.2) eleOffset = -0.2;
+    else eleOffset = 0;
+  }
 
   @Override
   public void periodic() {
@@ -130,12 +140,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     else isMotorsSet = true;
     }
 
-    if (m_offsetChooser != null) {
-      eleOffset = m_offsetChooser.getSelected()*2; 
-    } else eleOffset = 0;
-    if (eleOffset < 20) eleOffset = 20;
-    else if (eleOffset > -20) eleOffset = -20;
-    else eleOffset = 0;
   }
 
   public void reachGoal(double goal) {

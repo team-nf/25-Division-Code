@@ -105,7 +105,7 @@ public class GripperSubsystem extends SubsystemBase {
   public Command throwAlgae() {return run(() -> the_hupletici.set(-0.5)).finallyDo(this::stop);}
 
   //public Command throwCoral() {return runEnd(() -> sparkPID.setReference(0.5, ControlType.kMAXMotionVelocityControl), this::stop);}
-  public Command throwCoral() {return runEnd(() -> the_hupletici.set(-0.6), this::stop).onlyWhile(this::hasCoral);}
+  public Command throwCoral() {return runEnd(() -> the_hupletici.set(-0.6), this::stop);}
   //public Command stop() {return run(() -> sparkPID.setReference(0.03 ControlType.kMAXMotionVelocityControl));}
   public void stop() {the_hupletici.stopMotor(); autoCoralCounter = 0;}
 

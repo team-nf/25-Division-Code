@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.274971590909091,
-        "y": 5.864758522727272
+        "x": 10.450227272727272,
+        "y": 0.56984375
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.143200940879739,
-        "y": 5.6523050083039
+        "x": 10.31845662269792,
+        "y": 0.35739023557662764
       },
       "isLocked": false,
       "linkedName": "2C-BL-4e"
@@ -48,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0.0,
-    "rotation": -119.99999999999999
+    "rotation": 88.8911878722401
   },
   "useDefaultConstraints": true
 }

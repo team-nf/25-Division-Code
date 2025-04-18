@@ -11,7 +11,6 @@ import frc.robot.commands.AlgaeCarryCmd;
 import frc.robot.commands.AlgaeGroundCmd;
 import frc.robot.commands.AlgaeNetCmd;
 import frc.robot.commands.AlgaeProCmd;
-import frc.robot.commands.AlgaeTrackCmd;
 import frc.robot.commands.ClosedCmd;
 import frc.robot.commands.ClosedFullyCmd;
 import frc.robot.commands.CoralCarryCmd;
@@ -71,6 +70,7 @@ public class RobotContainer {
       OperatorConstants.kDriverControllerPort);
   
   private final CommandXboxController m_driverController = new CommandXboxController(1);
+  
 
   private final SendableChooser<Integer> m_reefChooser = new SendableChooser<>();
   private final SendableChooser<Boolean> m_isColorBlue = new SendableChooser<>();
@@ -132,7 +132,6 @@ public class RobotContainer {
     NamedCommands.registerCommand("AlgaeNet", new AlgaeNetCmd(m_mainMech));
     NamedCommands.registerCommand("AlgaeProcessor", new AlgaeProCmd(m_mainMech));
     NamedCommands.registerCommand("AlgaeGround",    new AlgaeGroundCmd(m_mainMech));
-    NamedCommands.registerCommand("AlgaeTrack",     new AlgaeTrackCmd(m_swerve));
 
     NamedCommands.registerCommand("TakeCoralAuto", m_gripperSubsystem.TakeCoralAutoCommand());
     NamedCommands.registerCommand("ThrowCoralAuto", m_gripperSubsystem.ThrowCoralAutoCommand());
@@ -227,8 +226,8 @@ public class RobotContainer {
     m_operatorController.circle().whileTrue(NamedCommands.getCommand("CoralStage2"));
     m_operatorController.square().whileTrue(NamedCommands.getCommand("CoralStage3"));
     m_operatorController.triangle().whileTrue(NamedCommands.getCommand("CoralStage4"));
-
-    // m_operatorController.triangle().whileTrue(NamedCommands.getCommand("AlgaeTrack"));
+    
+    m_operatorController.povLeft().whileTrue(NamedCommands.getCommand("AlgaeNet")); 
 
     m_operatorController.L1().whileTrue(m_armSubsystem.turnJ1(0.2));
     m_operatorController.R1().whileTrue(m_armSubsystem.turnJ1(-0.2));
@@ -239,8 +238,8 @@ public class RobotContainer {
     m_operatorController.touchpad().whileTrue(m_mainMech.resetMechanismsCmd());
     m_operatorController.PS().whileTrue(m_mainMech.resetEncodersCmd());
 
-    m_operatorController.L3().whileTrue(NamedCommands.getCommand("CoralCarry"));
-    m_operatorController.R3().whileTrue(NamedCommands.getCommand("AlgaeCarry"));
+    m_operatorController.L3().whileTrue(NamedCommands.getCommand("AlgaeGround"));
+    m_operatorController.R3().whileTrue(NamedCommands.getCommand("CoralIntake"));
 
     // -------
 
@@ -248,14 +247,14 @@ public class RobotContainer {
     m_driverController.rightBumper()
         .whileTrue(m_swerve.applyRequest(() -> driveRobotCentric
             .withVelocityX(
-                -m_driverController.getLeftY() * m_swerve.getMaxSpeed() * m_swerve.getDriveMultiplier() * kDrive * 0.3) // Drive
+                -m_driverController.getLeftY() * m_swerve.getMaxSpeed() * m_swerve.getDriveMultiplier() * kDrive * 0.45) // Drive
                                                                                                                         // forward
                                                                                                                         // with
                                                                                                                         // negative
                                                                                                                         // Y
                                                                                                                         // (forward)
             .withVelocityY(
-                -m_driverController.getLeftX() * m_swerve.getMaxSpeed() * m_swerve.getDriveMultiplier() * kDrive * 0.3) // Drive
+                -m_driverController.getLeftX() * m_swerve.getMaxSpeed() * m_swerve.getDriveMultiplier() * kDrive * 0.45) // Drive
                                                                                                                         // left
                                                                                                                         // with
                                                                                                                         // negative
@@ -321,23 +320,23 @@ public class RobotContainer {
     m_driverController.back().and(() -> {return !isAlgaeSelected;}).
               whileTrue(NamedCommands.getCommand("CoralIntake"));
     
-    m_driverController.leftBumper().and(() -> {return checkIntake(1) && !isAlgaeSelected;})
+    m_driverController.leftBumper().and(() -> {return checkIntake(1);})
         .whileTrue(autoIntake(1)
               .andThen(NamedCommands.getCommand("CoralCarry").onlyIf(m_gripperSubsystem::hasCoral)));
 
-    m_driverController.leftBumper().and(() -> {return checkIntake(2) && !isAlgaeSelected;})
+    m_driverController.leftBumper().and(() -> {return checkIntake(2);})
         .whileTrue(autoIntake(2)
             .andThen(NamedCommands.getCommand("CoralCarry").onlyIf(m_gripperSubsystem::hasCoral)));
             
-    m_driverController.leftBumper().and(() -> {return checkIntake(12) && !isAlgaeSelected;})
+    m_driverController.leftBumper().and(() -> {return checkIntake(12);})
         .whileTrue(autoIntake(12)
             .andThen(NamedCommands.getCommand("CoralCarry").onlyIf(m_gripperSubsystem::hasCoral)));    
             
-    m_driverController.leftBumper().and(() -> {return checkIntake(13) && !isAlgaeSelected;})
-        .whileTrue(autoIntake(1)
+    m_driverController.leftBumper().and(() -> {return checkIntake(13);})
+        .whileTrue(autoIntake(13)
             .andThen(NamedCommands.getCommand("CoralCarry").onlyIf(m_gripperSubsystem::hasCoral)));
     
-    m_driverController.leftBumper().and(() -> {return !isAlgaeSelected;}).onTrue(NamedCommands.getCommand("TakeCoralAuto"));
+    m_driverController.leftBumper().onTrue(NamedCommands.getCommand("TakeCoralAuto"));
 
     // 17 - L_34
     m_driverController.y().and(() -> {
@@ -702,6 +701,7 @@ public class RobotContainer {
       return isAlgaeSelected;
     }).whileTrue(NamedCommands.getCommand("AlgaeProcessor"));
 
+    /*
     m_driverController.leftBumper().and(() -> {
       return isAlgaeSelected;
     }).and(() -> {
@@ -712,7 +712,7 @@ public class RobotContainer {
     }).and(() -> {
       return checkTeam(false);
     }).whileTrue(m_swerve.goToRedNet().alongWith(NamedCommands.getCommand("FullyClosed")));
-
+    */
     m_driverController.y().and(() -> {
       return isAlgaeSelected;
     }).onTrue(m_gripperSubsystem.takeAlgae());
@@ -843,9 +843,11 @@ public class RobotContainer {
   public void putSelectedReefID() {
     SmartDashboard.putNumber("SelectedReef", selectedReef);
     SmartDashboard.putNumber("SelectedReefID", selectedReefID);
+    SmartDashboard.putNumber("SelectedIntakeID", selectedIntake);
     SmartDashboard.putBoolean("IsBlueSelected", isBlueSelected);
     SmartDashboard.putBoolean("IsAlgaeSelected", isAlgaeSelected);
     SmartDashboard.putBoolean("IsL34Selected", isL34Selected);
+
   }
 
   public void setSelectorInfos() {
@@ -874,6 +876,15 @@ public class RobotContainer {
   public void teamColorHandler(boolean a)
   {
     isBlueSelected = a;
+
+    selectedReefID = selectedReef;
+    if (isBlueSelected)
+      selectedReefID += 16;
+    else {
+      selectedReefID = 9 - selectedReefID;
+      if (selectedReefID <= 5)
+        selectedReefID += 6;
+    }
   }
 
   public void algaeModeHandler(boolean a)
@@ -1007,15 +1018,23 @@ public class RobotContainer {
   public Command getAutonomousCommandBlue() {
     // An example command will be run in autonomous
     return m_swerve.setPoseBlueAuto()
-        .andThen(autoReefPoseS4R(11))
-        .andThen(autoIntakeForAuto(1))
-        .andThen(autoReefPoseS4L(6))
-        .andThen(autoIntakeForAuto(1))
-        .andThen(autoReefPoseS4R(6))
-        .andThen(autoIntake(1));
+        .andThen(autoReefPoseS4R(20))
+        .andThen(autoIntakeForAuto(13))
+        .andThen(autoReefPoseS4L(19))
+        .andThen(autoIntakeForAuto(13))
+        .andThen(autoReefPoseS4R(19))
+        .andThen(autoIntake(13));
   }
 
-public Command getAutonomousCommandRed() {
+  public Command getAutonomousCommandBlue_2() {
+    // An example command will be run in autonomous
+    return m_swerve.setPoseBlueAuto_2()
+        .andThen(autoReefPoseS4R(21))
+        .andThen(m_swerve.goToTagAuto(21).andThen(NamedCommands.getCommand("FullyClosed")));
+  
+  }
+
+public Command getAutonomousCommandRed_1() {
   // An example command will be run in autonomous
   return m_swerve.setPoseRedAuto()
       .andThen(autoReefPoseS4R(11))
@@ -1026,14 +1045,22 @@ public Command getAutonomousCommandRed() {
       .andThen(autoIntake(1));
 }
 
+public Command getAutonomousCommandRed_2() {
+  // An example command will be run in autonomous
+  return m_swerve.setPoseRedAuto_2()
+      .andThen(autoReefPoseS4R(10))
+      .andThen(m_swerve.goToTagAuto(10).andThen(NamedCommands.getCommand("FullyClosed")));
+
+}
+
 public Command getAutonomousCommand() {
   // An example command will be run in autonomous
   Optional<Alliance> ally = DriverStation.getAlliance();
   if (ally.isPresent()) {
     if (ally.get() == Alliance.Blue) {
-      return getAutonomousCommandBlue();
+      return getAutonomousCommandBlue_2();
     } else
-      return getAutonomousCommandRed();
+      return getAutonomousCommandRed_2();
   }
   return null;
 }

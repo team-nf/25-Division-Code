@@ -33,7 +33,7 @@ public final class Constants {
   }
 
   public class InitialConstants {
-    public static final double[] EncoderStartAngles = {205.5/2,207.7/2};
+    public static final double[] EncoderStartAngles = {(277.5)/2,167.5/2};
     // **** Second joint should be equal to 355 at zeroing position
   }
 
@@ -211,6 +211,31 @@ public final class Constants {
     public static final double minHeightForL4 = 0.25;
   }
 
+  public static class  Climb {
+    public static final int kMotor1Port = 49;
+
+    public static final double kClimbKp = 0.5;
+    public static final double kClimbKi = 0.0;
+    public static final double kClimbKd = 0.0;
+    public static final double kClimbkG = 0.0; // volts (V)
+    public static final double kClimbkV = 0.0; // volt per velocity (V/(m/s))
+    public static final double kClimbkA = 0.0; // volt per acceleration (V/(m/s²))
+
+    public static final double kClimbMMCV = 200; //12V sınır koyunca maximum 90 cıvarına çıktı zaten velocity
+    //+bence iki kat daha hızlı olabilir ama mümkün görünmüyor iyi bir sınır olmalı
+    public static final double kClimbMMA = 50;
+    public static final double kClimbMMJ = 0; // kullanmıyoruz
+
+    public static final double kAmpLimit = 37;
+    public static final double kVoltageLimit = 8;
+
+    public static final double kSetpointMeters = 1.2;
+    // Encoder is reset to measure 0 at the bottom, so minimum height is 0.
+    public static final double kClimbTolerance = 0.04;
+
+    public static final double kClimbReduction = 480.0;
+  }
+
   public class FunnelConstants {
 
     public static final int kLeftSensor = 6;
@@ -226,18 +251,18 @@ public final class Constants {
     public static final double j1Offset = 0;
     public static final double j2Offset = 0;
 
-    public static final double[] CoralIntake = {0.03, 211, 105};    //Coral Intake 217.5 110
+    public static final double[] CoralIntake = {0.02, 215.5, 105};    //Coral Intake 217.5 110
 
-    public static final double[] CoralStage1 = {0.05, 150, 170};      //Coral Stage 1
+    public static final double[] CoralStage1 = {0.03, 150, 170};      //Coral Stage 1
     public static final double[] CoralStage2 = {0.2, 150, 170};   //Coral Stage 2
     public static final double[] CoralStage3 = {0.61, 150, 170};    //Coral Stage 3
-    public static final double[] CoralStage4 = {1.43, 152, 140};    //Coral Stage 4
+    public static final double[] CoralStage4 = {1.43, 152, 150};    //Coral Stage 4
 
     public static final double[] CoralStage4Pre = {1.45, 160, 152};    //Coral Stage 4
     public static final double[] CoralCarry = {0.025, 180, 160};    //Coral Carry
 
 
-    public static final double[] AlgaeThrowNet = {1.56, 180, 225};    //Algae Shoot
+    public static final double[] AlgaeThrowNet = {1.6, 175, 220};    //Algae Shoot
     public static final double[] AlgaeRecoverNet = {1.38, 190, 170};    //Algae Recover After Net
     public static final double[] AlgaeThrowProcessor = {0.02, 90, 280};    //Algae Shoot
 
@@ -246,7 +271,7 @@ public final class Constants {
     public static final double[] AlgaeStage34 = {0.8, 120, 233};     //Algae Stage 3-4
     public static final double[] AlgaeStage34FromL4 = {0.8, 120, 233};     //Algae Stage 3-4
 
-    public static final double[] AlgaeGround = {0.25, 45, 257.5};  //Algae Ground
+    public static final double[] AlgaeGround = {0.275, 45, 259};  //Algae Ground
     public static final double[] AlgaeFromCoral = {0.25, 180, 180};  //Algae Ground
     public static final double[] AlgaeCarry = {0.25, 160, 210};  //Algae Ground
 
@@ -270,7 +295,7 @@ public final class Constants {
     public static final double[] checkTagPos18  = {2.5,4.1,0};
     public static final double[] safeTagPos18   = {2.3,4.1,0};
 
-    public static final double[] algaeNetPos14       = {1.5,6,0};
+    public static final double[] algaeNetPos14       = {1.58,6,0};
     public static final double[] algaeProcessorPos16 = {2.98,4,0};
     public static final double[] intakeCoralPos13    = {1.047,6.962,-54};
     //public static final double[] intakeCoralPos13    = {1.19,7.24,-56};
@@ -342,7 +367,7 @@ public final class Constants {
 
   public class PathConstants
   {
-    public static final double velocity = 4.5;
+    public static final double velocity = 4.2;
     public static final double acceleration = 5.2;
 
   }

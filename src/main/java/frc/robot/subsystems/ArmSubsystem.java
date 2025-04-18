@@ -44,14 +44,13 @@ public class ArmSubsystem extends SubsystemBase {
   private final StaticBrake m_firstJointBrake = new StaticBrake();
   private final StaticBrake m_secondJointBrake = new StaticBrake();
 
-
   private final MotionMagicVoltage m_firstJointMotionMagic = new MotionMagicVoltage(0).withSlot(0);
   private final MotionMagicVoltage m_secondJointMotionMagic = new MotionMagicVoltage(0).withSlot(0);
 
   private final MotionMagicVelocityVoltage m_firstJointMotionMagicVel = new MotionMagicVelocityVoltage(0).withSlot(1);
   private final MotionMagicVelocityVoltage m_secondJointMotionMagicVel = new MotionMagicVelocityVoltage(0).withSlot(1);
 
-  private final ArmHalfEncoder m_firstJointHalfcoder = new ArmHalfEncoder(Arm.FirstJoint.kEncoderChannel, false, false);
+  private final ArmHalfEncoder m_firstJointHalfcoder = new ArmHalfEncoder(Arm.FirstJoint.kEncoderChannel, false, true );
   private final ArmHalfEncoder m_secondJointHalfcoder = new ArmHalfEncoder(Arm.SecondJoint.kEncoderChannel, true, false);
 
   private final DCMotor armFirstJointDC = DCMotor.getKrakenX60(1);
@@ -118,6 +117,9 @@ public class ArmSubsystem extends SubsystemBase {
   private boolean isMotorsSet = false;
 
   private double j2Offset = 0;
+
+  private double j1MSpos = SmartDashboard.getNumber("Arm/J1/M-StartPos", 0);
+  private double j2MSpos = SmartDashboard.getNumber("Arm/J2/M-StartPos", 0);
 
   public ArmSubsystem() {
         TalonFXConfiguration firstJointConfigs = new TalonFXConfiguration();
@@ -199,9 +201,20 @@ public class ArmSubsystem extends SubsystemBase {
         m_offsetChooser.addOption("-8", -8);
         m_offsetChooser.addOption("-9", -9);
         m_offsetChooser.addOption("-10", -10);
+        m_offsetChooser.onChange(this::offsetListener);
         SmartDashboard.putData("Arm/J2OffsetChooser", m_offsetChooser);
         SmartDashboard.setPersistent("Arm/J2OffsetCooser");
         resetArmPositions();        
+  }
+
+  public void offsetListener(double selected)
+  {
+    if (m_offsetChooser != null) {
+      j2Offset = selected*3; 
+    } else j2Offset = 0;
+    if (j2Offset > 30) j2Offset = 30;
+    else if (j2Offset < -30) j2Offset = -30;
+    else j2Offset = 0;
   }
 
   @Override
@@ -209,11 +222,11 @@ public class ArmSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
     m_firstJointHalfcoder.periodic();
     m_secondJointHalfcoder.periodic();
-    SmartDashboard.putNumber("Arm/J1-M-Pos", Units.rotationsToDegrees(m_armFirstJointMotor.getRotorPosition().getValueAsDouble())/Arm.FirstJoint.kArmReduction);
-    SmartDashboard.putNumber("Arm/J2-M-Pos", Units.rotationsToDegrees(m_armSecondJointMotor.getRotorPosition().getValueAsDouble())/Arm.SecondJoint.kArmReduction);
+    //SmartDashboard.putNumber("Arm/J1-M-Pos", Units.rotationsToDegrees(m_armFirstJointMotor.getRotorPosition().getValueAsDouble())/Arm.FirstJoint.kArmReduction);
+    //SmartDashboard.putNumber("Arm/J2-M-Pos", Units.rotationsToDegrees(m_armSecondJointMotor.getRotorPosition().getValueAsDouble())/Arm.SecondJoint.kArmReduction);
     
-    SmartDashboard.putNumber("Arm/J1-Angle", getFirstJointAngle());
-    SmartDashboard.putNumber("Arm/J2-Angle", getSecondJointAngle());
+    SmartDashboard.putNumber("Arm/J1-Angle", (int)getFirstJointAngle());
+    SmartDashboard.putNumber("Arm/J2-Angle", (int)getSecondJointAngle());
 
     if(Robot.isReal())
     {
@@ -223,9 +236,6 @@ public class ArmSubsystem extends SubsystemBase {
 
     SmartDashboard.putBoolean("Arm/J1-isReached", isJ1GoalReached);
     SmartDashboard.putBoolean("Arm/J2-isReached", isJ2GoalReached);
-    SmartDashboard.putNumber("Arm/J1LastAngle", armJ1LastAngle);
-    SmartDashboard.putNumber("Arm/J2LastAngle", armJ2LastAngle);
-
 
     if(RobotState.isTest()) NeutralOutMotors();
     if(isInitialReady)
@@ -237,10 +247,14 @@ public class ArmSubsystem extends SubsystemBase {
     armJ1MotorPos = Units.rotationsToDegrees(m_armFirstJointMotor.getRotorPosition().getValueAsDouble())/Arm.SecondJoint.kArmReduction;
     armJ2MotorPos = Units.rotationsToDegrees(m_armSecondJointMotor.getRotorPosition().getValueAsDouble())/Arm.SecondJoint.kArmReduction;
 
+    j1MSpos = SmartDashboard.getNumber("Arm/J1/M-StartPos", 0);
+    j2MSpos = SmartDashboard.getNumber("Arm/J2/M-StartPos", 0);
+
+  
     if(!isMotorsSet)
     {
-    if(Math.abs(SmartDashboard.getNumber("Arm/J1/M-StartPos", 0) - m_firstJointHalfcoder.getAngle()) > 5
-        ||  Math.abs(SmartDashboard.getNumber("Arm/J2/M-StartPos", 0) - m_secondJointHalfcoder.getAngle()) > 5)
+    if(Math.abs(j1MSpos - m_firstJointHalfcoder.getAngle()) > 5
+        ||  Math.abs(j2MSpos - m_secondJointHalfcoder.getAngle()) > 5)
     {
       resetArmPositions();
     }
@@ -248,15 +262,7 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
 
-    if (m_offsetChooser != null) {
-      j2Offset = m_offsetChooser.getSelected()*3; 
-    } else j2Offset = 0;
-    if (j2Offset < 30) j2Offset = 30;
-    else if (j2Offset > -30) j2Offset = -30;
-    else j2Offset = 0;
-
-
-    SmartDashboard.putBoolean("Arm/isArmReady", isInitialReady);
+    //SmartDashboard.putBoolean("Arm/isArmReady", isInitialReady);
 
   }
 
@@ -325,10 +331,7 @@ public class ArmSubsystem extends SubsystemBase {
   {
     if(isArmReady && !isInitialReady)
     {
-      double j1Mpos = SmartDashboard.getNumber("Arm/J2/M-StartPos", 0);
-      double j2Mpos = SmartDashboard.getNumber("Arm/J1/M-StartPos", 0);
-
-      if(j1Mpos > 90 && j1Mpos < 270 && j2Mpos > 90 && j2Mpos < 270) 
+      if(j1MSpos > 90 && j1MSpos < 270 && j2MSpos > 90 && j2MSpos < 270) 
       {
         isInitialReady = true;
       }
@@ -345,7 +348,7 @@ public class ArmSubsystem extends SubsystemBase {
         goalJ1 = armJ1limitCW;
       }
 
-      if(SmartDashboard.getNumber("Elevator/ElevatorHeight", 0.1) < 0.24 && goalJ1 < 90)
+      if(SmartDashboard.getNumber("Elevator/ElevatorHeight", 0.1) < 0.2 && goalJ1 < 90)
             goalJ1 = 90;
       
 
@@ -469,8 +472,8 @@ public class ArmSubsystem extends SubsystemBase {
     
     m_armFirstJointMotor.setPosition(Units.degreesToRotations(getFirstJointAngle())*Arm.FirstJoint.kArmReduction);
     m_armSecondJointMotor.setPosition(Units.degreesToRotations(getSecondJointAngle())*Arm.SecondJoint.kArmReduction);
-    SmartDashboard.putNumber("Arm/J2/M-StartPos", Units.rotationsToDegrees(m_armSecondJointMotor.getRotorPosition().getValueAsDouble())/Arm.SecondJoint.kArmReduction);
-    SmartDashboard.putNumber("Arm/J1/M-StartPos", Units.rotationsToDegrees(m_armFirstJointMotor.getRotorPosition().getValueAsDouble())/Arm.FirstJoint.kArmReduction);
+    SmartDashboard.putNumber("Arm/J2/M-StartPos", (int)Units.rotationsToDegrees((m_armSecondJointMotor.getRotorPosition().getValueAsDouble())/Arm.SecondJoint.kArmReduction));
+    SmartDashboard.putNumber("Arm/J1/M-StartPos", (int)Units.rotationsToDegrees(m_armFirstJointMotor.getRotorPosition().getValueAsDouble())/Arm.FirstJoint.kArmReduction);
     armJ1LastAngle = m_firstJointHalfcoder.getAngle();
     armJ2LastAngle = m_secondJointHalfcoder.getAngle();
   }
