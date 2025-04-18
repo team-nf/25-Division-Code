@@ -78,6 +78,8 @@ public class RobotContainer {
   private final SendableChooser<Boolean> m_isL34       = new SendableChooser<>();
   private final SendableChooser<Boolean> m_isAutoThrow = new SendableChooser<>();
   private final SendableChooser<Integer> m_checkIntake = new SendableChooser<>();
+  private final SendableChooser<Integer> m_autoChooser = new SendableChooser<>();
+
 
   public final CommandSwerveDrivetrain m_swerve = TunerConstants.createDrivetrain();
 
@@ -160,6 +162,10 @@ public class RobotContainer {
     m_reefChooser.addOption("5", 5);
     m_reefChooser.addOption("6", 6);
 
+    m_autoChooser.setDefaultOption("Left", 1);
+    m_autoChooser.setDefaultOption("Middle", 2);
+    m_autoChooser.setDefaultOption("Right", 3);
+
     m_isAutoThrow.setDefaultOption("Yes", true);
     m_isAutoThrow.addOption("No", false);
 
@@ -197,6 +203,7 @@ public class RobotContainer {
     SmartDashboard.putData("AlgaeMode", m_isAlgaeMode);
     SmartDashboard.putData("StageMode", m_isL34);
     SmartDashboard.putData("IntakeSelect", m_checkIntake);
+    SmartDashboard.putData("AutoChooser", m_autoChooser);
     SmartDashboard.putBoolean("AlgaeGroundFinished", true);
 
     m_mainMech.resetMechanisms();
@@ -235,7 +242,7 @@ public class RobotContainer {
     m_operatorController.R2().whileTrue(m_armSubsystem.turnJ2(-0.15));
     m_operatorController.povUp().whileTrue(m_elevatorSubsystem.eleSpeedControl(0.1));
     m_operatorController.povDown().whileTrue(m_elevatorSubsystem.eleSpeedControl(-0.1));
-    m_operatorController.touchpad().whileTrue(m_mainMech.resetMechanismsCmd());
+    //m_operatorController.touchpad().whileTrue(m_mainMech.resetMechanismsCmd());
     m_operatorController.PS().whileTrue(m_mainMech.resetEncodersCmd());
 
     m_operatorController.L3().whileTrue(NamedCommands.getCommand("AlgaeGround"));
@@ -978,15 +985,15 @@ public class RobotContainer {
   }
 
   public Command autoReefPoseS1L(int id) {
-    return m_swerve.goToTagL(id).andThen(NamedCommands.getCommand("CoralStage1")
-        .withDeadline(m_swerve.goToReefWithPID(id, true, 3)))
+    return m_swerve.goToTag(id).andThen(NamedCommands.getCommand("CoralStage1")
+        .withDeadline(m_swerve.goToReefWithPID(id, true, 1)))
         .andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(this::isAutoThrow));
 
   }
 
   public Command autoReefPoseS1R(int id) {
-    return m_swerve.goToTagR(id).andThen(NamedCommands.getCommand("CoralStage1")
-        .withDeadline(m_swerve.goToReefWithPID(id, false, 3)))
+    return m_swerve.goToTag(id).andThen(NamedCommands.getCommand("CoralStage1")
+        .withDeadline(m_swerve.goToReefWithPID(id, false, 1)))
         .andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(this::isAutoThrow));
 
   }
@@ -1015,21 +1022,21 @@ public class RobotContainer {
                 .andThen(m_swerve.goToIntakeWithPid(id).alongWith(NamedCommands.getCommand("TakeCoralAuto"))));
   }
 
-  public Command getAutonomousCommandBlue() {
+  public Command getAutonomousCommandBlue_1() {
     // An example command will be run in autonomous
     return m_swerve.setPoseBlueAuto()
-        .andThen(autoReefPoseS4R(20).withTimeout(7))
+        .andThen(autoReefPoseS4R(20).withTimeout(5).andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(m_gripperSubsystem::hasCoral)))
         .andThen(autoIntakeForAuto(13))
-        .andThen(autoReefPoseS4L(19).withTimeout(7))
+        .andThen(autoReefPoseS4L(19).withTimeout(5).andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(m_gripperSubsystem::hasCoral)))
         .andThen(autoIntakeForAuto(13))
-        .andThen(autoReefPoseS4R(19).withTimeout(7))
+        .andThen(autoReefPoseS4R(19).withTimeout(5).andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(m_gripperSubsystem::hasCoral)))
         .andThen(autoIntake(13));
   }
 
   public Command getAutonomousCommandBlue_2() {
     // An example command will be run in autonomous
     return m_swerve.setPoseBlueAuto_2()
-        .andThen(autoReefPoseS4R(21).withTimeout(7))
+        .andThen(autoReefPoseS4R(21).withTimeout(5).andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(m_gripperSubsystem::hasCoral)))
         .andThen(m_swerve.goToTagAuto(21).andThen(NamedCommands.getCommand("FullyClosed")));
   
   }
@@ -1037,29 +1044,29 @@ public class RobotContainer {
   public Command getAutonomousCommandBlue_3() {
     // An example command will be run in autonomous
     return m_swerve.setPoseBlueAuto_3()
-        .andThen(autoReefPoseS4R(22).withTimeout(7))
+        .andThen(autoReefPoseS4L(22).withTimeout(5).andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(m_gripperSubsystem::hasCoral)))
         .andThen(autoIntakeForAuto(12))
-        .andThen(autoReefPoseS4L(17).withTimeout(7))
+        .andThen(autoReefPoseS4R(17).withTimeout(5).andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(m_gripperSubsystem::hasCoral)))
         .andThen(autoIntakeForAuto(12))
-        .andThen(autoReefPoseS4R(17).withTimeout(7))
+        .andThen(autoReefPoseS4L(17).withTimeout(5).andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(m_gripperSubsystem::hasCoral)))
         .andThen(autoIntake(12));
   }
 
 public Command getAutonomousCommandRed_1() {
   // An example command will be run in autonomous
   return m_swerve.setPoseRedAuto()
-      .andThen(autoReefPoseS4R(11).withTimeout(7))
+      .andThen(autoReefPoseS4R(11).withTimeout(5).andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(m_gripperSubsystem::hasCoral)))
       .andThen(autoIntakeForAuto(1))
-      .andThen(autoReefPoseS4L(6).withTimeout(7))
+      .andThen(autoReefPoseS4L(6).withTimeout(5).andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(m_gripperSubsystem::hasCoral)))
       .andThen(autoIntakeForAuto(1))
-      .andThen(autoReefPoseS4R(6).withTimeout(7))
+      .andThen(autoReefPoseS4R(6).withTimeout(5).andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(m_gripperSubsystem::hasCoral)))
       .andThen(autoIntake(1));
 }
 
 public Command getAutonomousCommandRed_2() {
   // An example command will be run in autonomous
   return m_swerve.setPoseRedAuto_2()
-      .andThen(autoReefPoseS4R(10).withTimeout(7))
+      .andThen(autoReefPoseS4R(10).withTimeout(5).andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(m_gripperSubsystem::hasCoral)))
       .andThen(m_swerve.goToTagAuto(10).andThen(NamedCommands.getCommand("FullyClosed")));
 
 }
@@ -1067,11 +1074,11 @@ public Command getAutonomousCommandRed_2() {
 public Command getAutonomousCommandRed_3() {
   // An example command will be run in autonomous
   return m_swerve.setPoseRedAuto_3()
-      .andThen(autoReefPoseS4R(9).withTimeout(7))
+      .andThen(autoReefPoseS4R(9).withTimeout(5).andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(m_gripperSubsystem::hasCoral)))
       .andThen(autoIntakeForAuto(2))
-      .andThen(autoReefPoseS4L(8).withTimeout(7))
+      .andThen(autoReefPoseS4L(8).withTimeout(5).andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(m_gripperSubsystem::hasCoral)))
       .andThen(autoIntakeForAuto(2))
-      .andThen(autoReefPoseS4R(8).withTimeout(7))
+      .andThen(autoReefPoseS4R(8).withTimeout(5).andThen(NamedCommands.getCommand("ThrowCoralAuto").onlyIf(m_gripperSubsystem::hasCoral)))
       .andThen(autoIntake(2));
 }
 
@@ -1080,10 +1087,14 @@ public Command getAutonomousCommand() {
   Optional<Alliance> ally = DriverStation.getAlliance();
   if (ally.isPresent()) {
     if (ally.get() == Alliance.Blue) {
-      return getAutonomousCommandBlue_2();
+      if(m_autoChooser.getSelected().intValue() == 1) return getAutonomousCommandBlue_1();
+      else if(m_autoChooser.getSelected().intValue() == 3) return getAutonomousCommandBlue_3();
+      else return getAutonomousCommandBlue_2();
+
     } else
-      return getAutonomousCommandRed_2();
-  }
+    if(m_autoChooser.getSelected().intValue() == 1) return getAutonomousCommandRed_1();
+    else if(m_autoChooser.getSelected().intValue() == 3) return getAutonomousCommandRed_3();
+    else return getAutonomousCommandRed_2();  }
   return null;
 }
 
@@ -1135,5 +1146,9 @@ public void algaeModeLLControl()
   }
 }
 
+public Command poseTestCommand()
+{
+  return m_swerve.setPoseBlueAuto_3();
+}
 
 }

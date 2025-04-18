@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.5397826497807439,
-        "y": 7.23321131636779
+        "x": 1.03,
+        "y": 6.95
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.4253521109175233,
-        "y": 7.010937494752483
+        "x": 0.9155694611367795,
+        "y": 6.727726178384693
       },
       "isLocked": false,
       "linkedName": "2C-BL-3e"
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 88.8911878722401
+    "rotation": 88.89118787224011
   },
   "reversed": false,
   "folder": null,

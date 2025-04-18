@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.572387930631778,
-        "y": 5.213500554118622
+        "x": 10.385,
+        "y": 7.579872159090908
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.936805236425489,
-        "y": 5.689076007022545
+        "x": 9.74941730579371,
+        "y": 8.055447611994826
       },
       "isLocked": false,
       "linkedName": "2C-BL-2e"
     },
     {
       "anchor": {
-        "x": 1.5397826497807439,
-        "y": 7.23321131636779
+        "x": 1.03,
+        "y": 6.95
       },
       "prevControl": {
-        "x": 2.4330681818215627,
-        "y": 6.8020880681759675
+        "x": 1.9232855320408189,
+        "y": 6.518876751808178
       },
       "nextControl": null,
       "isLocked": false,
@@ -48,7 +48,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0.0,
-    "rotation": -119.99999999999999
+    "rotation": -90.0
   },
   "useDefaultConstraints": true
 }

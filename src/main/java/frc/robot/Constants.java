@@ -158,7 +158,7 @@ public final class Constants {
 
       public static final double[] kSimOffsets = {0.091,0.007,0.275};
       
-      public static final double kAngleTolerance = 15;
+      public static final double kAngleTolerance = 13;
       public static final double kArmSafetyFactor = 1;
     }
 
@@ -205,7 +205,7 @@ public final class Constants {
     // Encoder is reset to measure 0 at the bottom, so minimum height is 0.
     public static final double kMinElevatorHeightMeters = 0.009;
     public static final double kMaxElevatorHeightMeters = 1.6;
-    public static final double kElevatorTolerance = 0.04;
+    public static final double kElevatorTolerance = 0.035;
     public static final double kReadyPos = 0.04;
 
     public static final double minHeightForL4 = 0.25;
@@ -251,14 +251,14 @@ public final class Constants {
     public static final double j1Offset = 0;
     public static final double j2Offset = 0;
 
-    public static final double[] CoralIntake = {0.02, 215.5, 105};    //Coral Intake 217.5 110
+    public static final double[] CoralIntake = {0.035, 215.5, 105};    //Coral Intake 217.5 110
 
-    public static final double[] CoralStage1 = {0.03, 150, 170};      //Coral Stage 1
+    public static final double[] CoralStage1 = {0.02, 130, 210};      //Coral Stage 1
     public static final double[] CoralStage2 = {0.2, 150, 170};   //Coral Stage 2
     public static final double[] CoralStage3 = {0.61, 150, 170};    //Coral Stage 3
-    public static final double[] CoralStage4 = {1.43, 152, 150};    //Coral Stage 4
+    public static final double[] CoralStage4 = {1.41, 155, 152};    //Coral Stage 4
 
-    public static final double[] CoralStage4Pre = {1.45, 160, 152};    //Coral Stage 4
+    public static final double[] CoralStage4Pre = {1.45, 160, 155};    //Coral Stage 4
     public static final double[] CoralCarry = {0.025, 180, 160};    //Coral Carry
 
     public static final double[] AlgaeThrowNet = {1.6, 175, 240};    //Algae Shoot
@@ -282,27 +282,33 @@ public final class Constants {
 
   public class AutoConstants
   {
-    public static final double[] stage4Pos18R   = {3.14,3.94,0};
-    public static final double[] stage3Pos18R   = {3.14,3.94,0};
-    public static final double[] stage4Pos18L   = {3.14,4.29,0};
-    public static final double[] stage3Pos18L   = {3.14,4.29,0};
+    public static final double[] stage4Pos18R   = {3.14,3.96,0};
+    public static final double[] stage3Pos18R   = {3.14,3.96,0};
+    public static final double[] stage4Pos18L   = {3.14,4.3,0};
+    public static final double[] stage3Pos18L   = {3.14,4.3,0};
+    public static final double[] stage1Pos18R   = {3.12,4.1, -2};
+    public static final double[] stage1Pos18L   = {3.12,4.1, 2};
     public static final double[] algae3Pos      = {2.9,4.1,0};
     public static final double[] algae2Pos      = {2.9,4.15,0};
     public static final double[] takeAlgaePos   = {3.15,4.15,0};
-    public static final double[] checkTagPos18R = {2.7,3.95,0};
-    public static final double[] checkTagPos18L = {2.7,4.25,0};
+    public static final double[] checkTagPos18R = {2.7,3.96,0};
+    public static final double[] checkTagPos18L = {2.7,4.3,0};
     public static final double[] checkTagPos18  = {2.5,4.1,0};
     public static final double[] safeTagPos18   = {2.3,4.1,0};
 
     public static final double[] algaeNetPos14       = {1.58,6,0};
     public static final double[] algaeProcessorPos16 = {2.98,4,0};
-    public static final double[] intakeCoralPos13    = {1.047,6.962,-54};
+    public static final double[] intakeCoralPos13    = {1.0,6.98,-54};
     //public static final double[] intakeCoralPos13    = {1.19,7.24,-56};
 
     public static final Pose2d stage4RPose2D  = new Pose2d(stage4Pos18R[0], stage4Pos18R[1], Rotation2d.fromDegrees(stage4Pos18R[2]));
     public static final Pose2d stage3RPose2D  = new Pose2d(stage3Pos18R[0], stage3Pos18R[1], Rotation2d.fromDegrees(stage3Pos18R[2]));
     public static final Pose2d stage4LPose2D  = new Pose2d(stage4Pos18L[0], stage4Pos18L[1], Rotation2d.fromDegrees(stage4Pos18L[2]));
     public static final Pose2d stage3LPose2D  = new Pose2d(stage3Pos18L[0], stage3Pos18L[1], Rotation2d.fromDegrees(stage3Pos18L[2]));
+
+    public static final Pose2d stage1RPose2D  = new Pose2d(stage1Pos18R[0], stage1Pos18R[1], Rotation2d.fromDegrees(stage1Pos18R[2]));
+    public static final Pose2d stage1LPose2D  = new Pose2d(stage1Pos18L[0], stage1Pos18L[1], Rotation2d.fromDegrees(stage1Pos18L[2]));
+    
     public static final Pose2d algae3Pose2D   = new Pose2d(algae3Pos[0], algae3Pos[1], Rotation2d.fromDegrees(algae3Pos[2]));
     public static final Pose2d algae2Pose2D   = new Pose2d(algae2Pos[0], algae2Pos[1], Rotation2d.fromDegrees(algae2Pos[2]));
     public static final Pose2d takeAlgaePose2d   = new Pose2d(takeAlgaePos[0], takeAlgaePos[1], Rotation2d.fromDegrees(takeAlgaePos[2]));
@@ -351,6 +357,8 @@ public final class Constants {
     public static final Transform2d ReefPosS3RByTag =  new Transform2d(TAG18_POSE2D, stage3RPose2D);
     public static final Transform2d ReefPosS4LByTag =  new Transform2d(TAG18_POSE2D, stage4LPose2D);
     public static final Transform2d ReefPosS3LByTag =  new Transform2d(TAG18_POSE2D, stage3LPose2D);
+    public static final Transform2d ReefPosS1LByTag =  new Transform2d(TAG18_POSE2D, stage1LPose2D);
+    public static final Transform2d ReefPosS1RByTag =  new Transform2d(TAG18_POSE2D, stage1RPose2D);
     public static final Transform2d Algae3ByTag =  new Transform2d(TAG18_POSE2D, algae3Pose2D);
     public static final Transform2d Algae2ByTag =  new Transform2d(TAG18_POSE2D, algae2Pose2D);
     public static final Transform2d TakeAlgaeByTag =  new Transform2d(TAG18_POSE2D, takeAlgaePose2d);
@@ -361,13 +369,13 @@ public final class Constants {
     public static final Transform2d IntakeCoralByTag =  new Transform2d(TAG13_POSE2D, intakeCoral13Pose2D);
 
     public static final double LL_Accuracy_mt1 = 0.03;
-    public static final double MT1_DIST = 0.75;
+    public static final double MT1_DIST = 0.6;
   }
 
   public class PathConstants
   {
-    public static final double velocity = 4.2;
-    public static final double acceleration = 5.2;
+    public static final double velocity = 4.5;
+    public static final double acceleration = 5.5;
 
   }
 

@@ -115,18 +115,18 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     
 
     PIDController reefPIDX = new PIDController(
-        2, 1, 0.2);
+        2.0, 1, 0.2);
     
     PIDController reefPIDY = new PIDController(
-        2, 1, 0.2);
+        2.0, 1, 0.2);
 
-    private final PhoenixPIDController headingController = new PhoenixPIDController(2, 0., 0.);
+    private final PhoenixPIDController headingController = new PhoenixPIDController(1, 0., 0.);
 
     PIDController autoControllerX = new PIDController(
-        2.5, 1, 0.2);
+        2.7, 1, 0.2);
     
     PIDController autoControllerY = new PIDController(
-        2.5, 1, 0.2);
+        2.7, 1, 0.2);
 
     private final double errorLimit = 0.02;
     private final double errorLimitAuto = 0.06;
@@ -331,7 +331,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
 
-        if (Robot.isReal() && RobotState.isAutonomous() && getState().Pose.getX() > 0.1 && getState().Pose.getY() > 0.1)
+        if (Robot.isReal() && RobotState.isAutonomous())
         {
             if(isRightVisionEnabled)
             {            
@@ -546,6 +546,17 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             else
             {
                 reefTargetPose2d = aprilTagPose2d.transformBy(AutoConstants.ReefPosS3RByTag);
+            }
+        }
+        else if(stage == 1)
+        {
+            if(isLeft)
+            {
+                reefTargetPose2d = aprilTagPose2d.transformBy(AutoConstants.ReefPosS1LByTag);
+            }
+            else
+            {
+                reefTargetPose2d = aprilTagPose2d.transformBy(AutoConstants.ReefPosS1RByTag);
             }
         }
         
@@ -806,40 +817,46 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     public void registerTelemetry() {
         registerTelemetry(logger::telemeterize);
     }
+    
+    public void resetThePose(Pose2d p)
+    {
+        resetPose(p);
+        addVisionMeasurement(p, kNumConfigAttempts);
+    }
 
     public Command setPoseBlueAuto()
     {
-        return runOnce(() -> resetPose(new Pose2d(7.12, 7.55, new Rotation2d(Units.degreesToRadians(-90))))).andThen(new WaitCommand(0.5));
+        return runOnce(() -> resetThePose(new Pose2d(7.15, 7.55, new Rotation2d(Units.degreesToRadians(-90))))).andThen(new WaitCommand(0.03));
     }
 
     public Command setPoseBlueAuto_2()
     {
-        return runOnce(() -> resetPose(new Pose2d(7.12, 4, new Rotation2d(Units.degreesToRadians(180))))).andThen(new WaitCommand(0.5));
+        return runOnce(() -> resetThePose(new Pose2d(7.15, 4, new Rotation2d(Units.degreesToRadians(180))))).andThen(new WaitCommand(0.03));
     }
 
     public Command setPoseBlueAuto_3()
     {
-        return runOnce(() -> resetPose(new Pose2d(7.12, 0.45, new Rotation2d(Units.degreesToRadians(-90))))).andThen(new WaitCommand(0.5));
+        return runOnce(() -> resetThePose(new Pose2d(7.15, 0.45, new Rotation2d(Units.degreesToRadians(90))))).andThen(new WaitCommand(0.03));
     }
 
     public Command setPoseRedAuto()
     {
-        return runOnce(() -> resetPose(new Pose2d(10.4, 0.45, new Rotation2d(Units.degreesToRadians(90))))).andThen(new WaitCommand(0.5));
+        return runOnce(() -> resetThePose(new Pose2d(10.385, 0.45, new Rotation2d(Units.degreesToRadians(90))))).andThen(new WaitCommand(0.03));
     }
 
     public Command setPoseRedAuto_2()
     {
-        return runOnce(() -> resetPose(new Pose2d(10.4, 4, new Rotation2d(Units.degreesToRadians(0))))).andThen(new WaitCommand(0.5));
+        return runOnce(() -> resetThePose(new Pose2d(10.385, 4, new Rotation2d(Units.degreesToRadians(0))))).andThen(new WaitCommand(0.03));
     }
 
     public Command setPoseRedAuto_3()
     {
-        return runOnce(() -> resetPose(new Pose2d(10.4, 7.55, new Rotation2d(Units.degreesToRadians(90))))).andThen(new WaitCommand(0.5));
+        return runOnce(() -> resetThePose(new Pose2d(10.385, 7.55, new Rotation2d(Units.degreesToRadians(-90))))).andThen(new WaitCommand(0.03));
     }
 
     public Command setPose(double x, double y, double theta)
     {
-        return runOnce(() -> resetPose(new Pose2d(x, y, new Rotation2d(Units.degreesToRadians(theta)))));
+        return runOnce(() -> resetThePose(new Pose2d(x, y, new Rotation2d(Units.degreesToRadians(theta)))));
     }
 
     public Command goToBlueNet()

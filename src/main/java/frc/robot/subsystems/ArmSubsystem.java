@@ -121,6 +121,9 @@ public class ArmSubsystem extends SubsystemBase {
   private double j1MSpos = SmartDashboard.getNumber("Arm/J1/M-StartPos", 0);
   private double j2MSpos = SmartDashboard.getNumber("Arm/J2/M-StartPos", 0);
 
+  private double resetDelay = 100;
+  private double resetCounter = 0;
+
   public ArmSubsystem() {
         TalonFXConfiguration firstJointConfigs = new TalonFXConfiguration();
         firstJointConfigs.Slot0.kS = Arm.FirstJoint.kArmJoint1_kS;
@@ -256,13 +259,15 @@ public class ArmSubsystem extends SubsystemBase {
     if(Math.abs(j1MSpos - m_firstJointHalfcoder.getAngle()) > 5
         ||  Math.abs(j2MSpos - m_secondJointHalfcoder.getAngle()) > 5)
     {
-      resetArmPositions();
+      if(resetCounter == 0) resetArmPositions();
+      resetCounter += 1;
+      if(resetCounter >= resetDelay) resetCounter = 0;
     }
     else isMotorsSet = true;
     }
 
 
-    //SmartDashboard.putBoolean("Arm/isArmReady", isInitialReady);
+    SmartDashboard.putBoolean("Arm/isArmReady", isInitialReady && isMotorsSet);
 
   }
 
@@ -354,8 +359,6 @@ public class ArmSubsystem extends SubsystemBase {
 
       //SmartDashboard.putNumber("Arm/J1-Goal", goalJ1);
       isJ1GoalReached = (Math.abs(firstJointAngle - goalJ1) < Arm.FirstJoint.kAngleTolerance);
-
-      if(firstJointAngle < 30) isInitialReady = false;
 
       m_armFirstJointMotor.setControl(m_firstJointMotionMagic.withPosition(Units.degreesToRotations(goalJ1)
       *Arm.FirstJoint.kArmReduction));
@@ -472,8 +475,8 @@ public class ArmSubsystem extends SubsystemBase {
     
     m_armFirstJointMotor.setPosition(Units.degreesToRotations(getFirstJointAngle())*Arm.FirstJoint.kArmReduction);
     m_armSecondJointMotor.setPosition(Units.degreesToRotations(getSecondJointAngle())*Arm.SecondJoint.kArmReduction);
-    SmartDashboard.putNumber("Arm/J2/M-StartPos", (int)Units.rotationsToDegrees((m_armSecondJointMotor.getRotorPosition().getValueAsDouble())/Arm.SecondJoint.kArmReduction));
-    SmartDashboard.putNumber("Arm/J1/M-StartPos", (int)Units.rotationsToDegrees(m_armFirstJointMotor.getRotorPosition().getValueAsDouble())/Arm.FirstJoint.kArmReduction);
+    SmartDashboard.putNumber("Arm/J2/M-StartPos", Units.rotationsToDegrees((m_armSecondJointMotor.getRotorPosition().getValueAsDouble())/Arm.SecondJoint.kArmReduction));
+    SmartDashboard.putNumber("Arm/J1/M-StartPos", Units.rotationsToDegrees(m_armFirstJointMotor.getRotorPosition().getValueAsDouble())/Arm.FirstJoint.kArmReduction);
     armJ1LastAngle = m_firstJointHalfcoder.getAngle();
     armJ2LastAngle = m_secondJointHalfcoder.getAngle();
   }
